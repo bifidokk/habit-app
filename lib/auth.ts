@@ -147,7 +147,7 @@ export async function authenticateWithTelegram(): Promise<AuthResponse> {
 
     const data = await response.json()
     
-    if (data.success && data.token && data.user) {
+    if (data.token && data.user) {
       // Store the auth data
       storeAuthData(data.token, data.user)
       
@@ -183,14 +183,14 @@ export async function refreshTokenIfNeeded(): Promise<string | null> {
   if (!isTokenExpired(token)) {
     return token
   }
-  
+
   // Try to get a new token
   const authResult = await authenticateWithTelegram()
   
   if (authResult.success && authResult.token) {
     return authResult.token
   }
-  
+
   // Clear invalid auth data
   clearAuthData()
   return null
