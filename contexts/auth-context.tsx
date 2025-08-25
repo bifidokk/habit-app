@@ -9,11 +9,13 @@ import {
   type AuthUser 
 } from '@/lib/auth'
 import { getTelegramWebApp } from '@/lib/telegram'
+import { checkBackendHealth } from '@/lib/api'
 
 interface AuthContextType extends AuthState {
   signIn: () => Promise<boolean>
   signOut: () => void
   refreshAuth: () => Promise<void>
+  backendHealthy: boolean | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -37,26 +39,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user: null,
     isLoading: true
   })
+  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
 
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const state = getAuthState()
-        setAuthState({ ...state, isLoading: false })
+        // First check backend health
+        const healthy = await checkBackendHealth()
+        setBackendHealthy(healthy)
         
-        // Auto-authenticate if we're in Telegram and not already authenticated
-        if (!state.isAuthenticated) {
-          const tg = getTelegramWebApp()
-          if (tg?.initData) {
-            console.log('Auto-authenticating with Telegram...')
-            await signIn()
+        if (healthy) {
+          const state = getAuthState()
+          
+          // Auto-authenticate if we're in Telegram and not already authenticated
+          if (!state.isAuthenticated) {
+            const tg = getTelegramWebApp()
+            if (tg?.initData) {
+              // Authenticate directly without calling signIn callback to avoid double calls
+              const result = await authenticateWithTelegram()
+              
+              if (result.success && result.token && result.user) {
+                setAuthState({
+                  isAuthenticated: true,
+                  token: result.token,
+                  user: result.user,
+                  isLoading: false
+                })
+              } else {
+                setAuthState({
+                  isAuthenticated: false,
+                  token: null,
+                  user: null,
+                  isLoading: false
+                })
+              }
+            } else {
+              setAuthState({ ...state, isLoading: false })
+            }
           } else {
-            setAuthState(prev => ({ ...prev, isLoading: false }))
+            setAuthState({ ...state, isLoading: false })
           }
+        } else {
+          // Backend is down, run in offline mode
+          setAuthState({
+            isAuthenticated: false,
+            token: null,
+            user: null,
+            isLoading: false
+          })
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error)
+        setBackendHealthy(false)
         setAuthState({
           isAuthenticated: false,
           token: null,
@@ -84,7 +118,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
         return true
       } else {
-        console.error('Authentication failed:', result.error)
         setAuthState({
           isAuthenticated: false,
           token: null,
@@ -94,7 +127,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false
       }
     } catch (error) {
-      console.error('Sign in error:', error)
       setAuthState({
         isAuthenticated: false,
         token: null,
@@ -120,7 +152,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const state = getAuthState()
       setAuthState({ ...state, isLoading: false })
     } catch (error) {
-      console.error('Auth refresh failed:', error)
       signOut()
     }
   }, [signOut])
@@ -129,7 +160,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ...authState,
     signIn,
     signOut,
-    refreshAuth
+    refreshAuth,
+    backendHealthy
   }
 
   return (

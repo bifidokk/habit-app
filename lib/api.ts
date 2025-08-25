@@ -53,7 +53,6 @@ export async function authenticatedFetch(
 
   // Handle authentication errors
   if (response.status === 401) {
-    console.log('Authentication failed, clearing stored auth data')
     clearAuthData()
     throw new ApiError('Authentication failed', 401, response)
   }
@@ -192,7 +191,6 @@ export async function checkBackendHealth(): Promise<boolean> {
     })
     return response.ok
   } catch (error) {
-    console.error('Backend health check failed:', error)
     return false
   }
 }

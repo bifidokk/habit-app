@@ -45,7 +45,7 @@ export function storeAuthData(token: string, user: AuthUser): void {
     localStorage.setItem(TOKEN_KEY, token)
     localStorage.setItem(USER_KEY, JSON.stringify(user))
   } catch (error) {
-    console.error('Failed to store auth data:', error)
+    // Silently fail to store auth data
   }
 }
 
@@ -58,7 +58,6 @@ export function getStoredToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY)
   } catch (error) {
-    console.error('Failed to retrieve token:', error)
     return null
   }
 }
@@ -73,7 +72,6 @@ export function getStoredUser(): AuthUser | null {
     const userData = localStorage.getItem(USER_KEY)
     return userData ? JSON.parse(userData) : null
   } catch (error) {
-    console.error('Failed to retrieve user data:', error)
     return null
   }
 }
@@ -88,7 +86,7 @@ export function clearAuthData(): void {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
   } catch (error) {
-    console.error('Failed to clear auth data:', error)
+    // Silently fail to clear auth data
   }
 }
 
@@ -101,7 +99,6 @@ export function isTokenExpired(token: string): boolean {
     const currentTime = Math.floor(Date.now() / 1000)
     return payload.exp && payload.exp < currentTime
   } catch (error) {
-    console.error('Failed to parse token:', error)
     return true
   }
 }
@@ -142,7 +139,6 @@ export async function authenticateWithTelegram(): Promise<AuthResponse> {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Authentication failed:', response.status, errorText)
       return {
         success: false,
         error: `Authentication failed: ${response.status}`
@@ -168,7 +164,6 @@ export async function authenticateWithTelegram(): Promise<AuthResponse> {
     }
 
   } catch (error) {
-    console.error('Authentication error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Authentication failed'
@@ -190,7 +185,6 @@ export async function refreshTokenIfNeeded(): Promise<string | null> {
   }
   
   // Try to get a new token
-  console.log('Token expired, attempting to refresh...')
   const authResult = await authenticateWithTelegram()
   
   if (authResult.success && authResult.token) {

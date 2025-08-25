@@ -55,7 +55,6 @@ export async function getHabits(): Promise<Habit[]> {
     if (!isMigrated()) {
       const localHabits = getLocalHabits()
       if (localHabits.length > 0) {
-        console.log('Migrating local habits to backend...')
         try {
           const syncedHabits = await syncHabits(localHabits)
           markAsMigrated()
@@ -63,7 +62,6 @@ export async function getHabits(): Promise<Habit[]> {
           localStorage.removeItem(STORAGE_KEY)
           return syncedHabits
         } catch (error) {
-          console.error('Migration failed, using backend data:', error)
           markAsMigrated() // Mark as migrated to avoid repeated attempts
         }
       } else {
@@ -73,7 +71,6 @@ export async function getHabits(): Promise<Habit[]> {
     
     return backendHabits
   } catch (error) {
-    console.error('Failed to fetch habits from backend, falling back to local:', error)
     return getLocalHabits()
   }
 }
@@ -94,7 +91,6 @@ export async function saveHabits(habits: Habit[]): Promise<void> {
   // If authenticated, we don't need to save all habits at once
   // Individual CRUD operations will handle backend updates
   // This function is mainly for local fallback
-  console.log('Authenticated mode: habits are managed via individual API calls')
 }
 
 // Create a new habit
@@ -125,7 +121,6 @@ export async function addHabit(input: HabitInput): Promise<Habit> {
   try {
     return await apiCreateHabit(input)
   } catch (error) {
-    console.error('Failed to create habit on backend:', error)
     throw error
   }
 }
@@ -146,7 +141,6 @@ export async function removeHabit(habitId: string): Promise<void> {
   try {
     await apiDeleteHabit(habitId)
   } catch (error) {
-    console.error('Failed to delete habit from backend:', error)
     throw error
   }
 }
@@ -197,7 +191,6 @@ export async function toggleHabitCompletion(habitId: string, date: string): Prom
     // Return updated habits list
     return await getHabits()
   } catch (error) {
-    console.error('Failed to toggle habit completion:', error)
     throw error
   }
 }
@@ -230,5 +223,4 @@ export function isHabitActiveToday(habit: Habit): boolean {
 export async function syncWithBackendIfNeeded(_habit?: Habit | HabitInput) {
   // This function is deprecated - authentication and backend sync
   // are now handled automatically by the main storage functions
-  console.log('syncWithBackendIfNeeded is deprecated - backend sync is now automatic')
 }

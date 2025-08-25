@@ -45,7 +45,6 @@ export function HabitList({
       const updatedHabits = await toggleHabitCompletion(habitId, today)
       onUpdate(updatedHabits)
     } catch (error) {
-      console.error('Failed to toggle habit completion:', error)
       // TODO: Show error toast to user
     }
   }

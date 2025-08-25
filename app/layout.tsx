@@ -4,9 +4,10 @@ import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'Habit Tracker',
+  description: 'Track your daily habits with this Telegram Mini App',
+  viewport: 'width=device-width, initial-scale=1, user-scalable=no',
+  themeColor: '#000000',
 }
 
 export default function RootLayout({
@@ -17,6 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Telegram WebApp Script - REQUIRED for Mini Apps */}
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};

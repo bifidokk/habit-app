@@ -17,16 +17,14 @@ import { getTelegramWebApp, getTelegramUser } from "@/lib/telegram"
 import { useTelegramTheme } from "@/lib/telegram-theme"
 import { BackgroundFX } from "@/components/fx/background"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
-import { checkBackendHealth } from "@/lib/api"
 import type { Habit, HabitInput } from "@/types/habit"
 
 function TelegramHabitAppContent() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   
-  const { isAuthenticated, user: authUser, isLoading: authLoading, signIn } = useAuth()
+  const { isAuthenticated, user: authUser, isLoading: authLoading, signIn, backendHealthy } = useAuth()
   const tg = getTelegramWebApp()
   const tgUser = getTelegramUser()
 
@@ -56,7 +54,6 @@ function TelegramHabitAppContent() {
         const loadedHabits = await getHabits()
         setHabits(loadedHabits)
       } catch (err) {
-        console.error('Failed to load habits:', err)
         setError(err instanceof Error ? err.message : 'Failed to load habits')
       } finally {
         setIsLoading(false)
@@ -66,15 +63,6 @@ function TelegramHabitAppContent() {
     loadHabits()
   }, [isAuthenticated, authLoading])
   
-  // Check backend health on mount
-  useEffect(() => {
-    const checkHealth = async () => {
-      const healthy = await checkBackendHealth()
-      setBackendHealthy(healthy)
-    }
-    
-    checkHealth()
-  }, [])
 
   const onAdd = async (input: HabitInput) => {
     try {
@@ -85,7 +73,6 @@ function TelegramHabitAppContent() {
       const updatedHabits = await getHabits()
       setHabits(updatedHabits)
     } catch (err) {
-      console.error('Failed to add habit:', err)
       setError(err instanceof Error ? err.message : 'Failed to add habit')
     }
   }
@@ -99,7 +86,6 @@ function TelegramHabitAppContent() {
       const updatedHabits = await getHabits()
       setHabits(updatedHabits)
     } catch (err) {
-      console.error('Failed to delete habit:', err)
       setError(err instanceof Error ? err.message : 'Failed to delete habit')
     }
   }
@@ -111,7 +97,6 @@ function TelegramHabitAppContent() {
       // Individual completion toggles are handled in HabitList
       setHabits(updatedHabits)
     } catch (err) {
-      console.error('Failed to update habits:', err)
       setError(err instanceof Error ? err.message : 'Failed to update habits')
     }
   }
