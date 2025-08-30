@@ -1,7 +1,7 @@
 export type Habit = {
   id: string
   name: string
-  days: number[] // 0..6 (Sun..Sat)
+  days: number[] // 0..6 (Mon..Sun)
   time: string // "HH:MM"
   createdAt: string
   completions?: HabitCompletion[] // New: track when habits were completed
