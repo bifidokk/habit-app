@@ -95,7 +95,7 @@ function TelegramHabitAppContent() {
       setError(null)
       await updateHabit(updatedHabit)
 
-      const updatedHabits = habits.map((h) => (h.id === updatedHabit.id ? updatedHabit : h))
+      const updatedHabits = await getHabits()
       setHabits(updatedHabits)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update habits')

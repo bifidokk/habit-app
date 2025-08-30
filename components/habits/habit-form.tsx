@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import type { HabitInput } from "@/types/habit"
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-const UI_ORDER = [1, 2, 3, 4, 5, 6, 0] // Mon..Sun
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const UI_ORDER = [0, 1, 2, 3, 4, 5, 6] // Mon..Sun
 
 export function HabitForm({
   onAdd = () => {},
@@ -16,7 +16,7 @@ export function HabitForm({
   onAdd?: (input: HabitInput) => void
 }) {
   const [name, setName] = useState("")
-  const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]) // default weekdays
+  const [days, setDays] = useState<number[]>([0, 1, 2, 3, 4]) // default weekdays
   const [time, setTime] = useState("09:00")
   const [submitting, setSubmitting] = useState(false)
 
@@ -39,7 +39,7 @@ export function HabitForm({
         time,
       })
       setName("")
-      setDays([1, 2, 3, 4, 5])
+      setDays([0, 1, 2, 3, 4])
       setTime("09:00")
     } finally {
       setSubmitting(false)
@@ -106,7 +106,7 @@ export function HabitForm({
           variant="outline"
           onClick={() => {
             setName("")
-            setDays([1, 2, 3, 4, 5])
+            setDays([0, 1, 2, 3, 4])
             setTime("09:00")
           }}
         >
