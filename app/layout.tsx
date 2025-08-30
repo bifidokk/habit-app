@@ -19,11 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Telegram WebApp Script - REQUIRED for Mini Apps */}
-        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <script src="https://telegram.org/js/telegram-web-app.js" />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
+  --font-sans: ${GeistSans.style.fontFamily};
   --font-mono: ${GeistMono.variable};
 }
         `}</style>

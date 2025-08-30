@@ -13,21 +13,6 @@ export function BackgroundFX() {
       <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_10%,transparent,rgba(0,0,0,0.35))]" />
       {/* Grain overlay */}
       <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay" style={{ backgroundImage: "url('/images/noise.png')" }} />
-
-      <style jsx>{`
-        @keyframes float-slow {
-          0% { transform: translate3d(0,0,0) scale(1); }
-          50% { transform: translate3d(10px, -6px, 0) scale(1.02); }
-          100% { transform: translate3d(0,0,0) scale(1); }
-        }
-        @keyframes float-slower {
-          0% { transform: translate3d(0,0,0) scale(1); }
-          50% { transform: translate3d(-8px, 6px, 0) scale(1.015); }
-          100% { transform: translate3d(0,0,0) scale(1); }
-        }
-        .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
-        .animate-float-slower { animation: float-slower 16s ease-in-out infinite; }
-      `}</style>
     </div>
   )
 }

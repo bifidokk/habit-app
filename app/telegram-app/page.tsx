@@ -24,7 +24,7 @@ function TelegramHabitAppContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const { isAuthenticated, user: authUser, isLoading: authLoading, signIn, backendHealthy } = useAuth()
+  const { isAuthenticated, user: authUser, isLoading: authLoading, backendHealthy } = useAuth()
   const tg = getTelegramWebApp()
   const tgUser = getTelegramUser()
 
@@ -67,7 +67,7 @@ function TelegramHabitAppContent() {
   const onAdd = async (input: HabitInput) => {
     try {
       setError(null)
-      const newHabit = await addHabit(input)
+      await addHabit(input)
       
       // Reload habits to get the latest state
       const updatedHabits = await getHabits()

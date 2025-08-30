@@ -67,7 +67,7 @@ export function HabitList({
       const updatedHabits = await toggleHabitCompletion(habitId, today)
       onUpdate(updatedHabits)
     } catch (error) {
-      // TODO: Show error toast to user
+      console.error('Failed to toggle habit completion:', error)
     }
   }
 
@@ -113,6 +113,16 @@ export function HabitList({
                 isExpanded && "border-b border-white/10",
               )}
               onClick={() => setExpandedHabit(isExpanded ? null : habit.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setExpandedHabit(isExpanded ? null : habit.id)
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-expanded={isExpanded}
+              aria-label={`Toggle details for habit: ${habit.name}`}
             >
               <div className="flex items-start gap-3 min-w-0 flex-1">
                 {isActiveToday && (

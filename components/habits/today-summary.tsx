@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils"
 
 export function TodaySummary({ habits }: { habits: Habit[] }) {
   const [expandedNames, setExpandedNames] = useState<Set<string>>(new Set())
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   const isLongName = (name: string) => name.length > 50
 
   const toggleNameExpansion = (habitId: string) => {
