@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { HabitForm } from "@/components/habits/habit-form"
 import { HabitList } from "@/components/habits/habit-list"
 import { TodaySummary } from "@/components/habits/today-summary"
-import { getHabits, addHabit, removeHabit } from "@/lib/storage"
+import { getHabits, addHabit, removeHabit, updateHabit } from "@/lib/storage"
 import { getTelegramWebApp, getTelegramUser } from "@/lib/telegram"
 import { useTelegramTheme } from "@/lib/telegram-theme"
 import { BackgroundFX } from "@/components/fx/background"
@@ -90,11 +90,12 @@ function TelegramHabitAppContent() {
     }
   }
 
-  const onUpdate = async (updatedHabits: Habit[]) => {
+  const onUpdate = async (updatedHabit: Habit) => {
     try {
       setError(null)
-      // For now, just update the local state
-      // Individual completion toggles are handled in HabitList
+      await updateHabit(updatedHabit)
+
+      const updatedHabits = habits.map((h) => (h.id === updatedHabit.id ? updatedHabit : h))
       setHabits(updatedHabits)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update habits')

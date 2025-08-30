@@ -147,7 +147,7 @@ export async function createHabit(habitData: HabitInput): Promise<Habit> {
 /**
  * Update an existing habit
  */
-export async function updateHabit(habitId: string, habitData: Partial<Habit>): Promise<Habit> {
+export async function updateHabit(habitId: string, habitData: HabitInput): Promise<Habit> {
   return apiPut<Habit>(`/api/habits/${habitId}`, habitData)
 }
 

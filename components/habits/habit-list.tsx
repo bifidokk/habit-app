@@ -39,7 +39,7 @@ export function HabitList({
 }: {
   habits?: Habit[]
   onDelete?: (id: string) => void
-  onUpdate?: (habits: Habit[]) => void
+  onUpdate?: (habit: Habit) => void
 }) {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null)
@@ -65,15 +65,14 @@ export function HabitList({
     try {
       const today = getTodayDateString()
       const updatedHabits = await toggleHabitCompletion(habitId, today)
-      onUpdate(updatedHabits)
+      // onUpdate(updatedHabits)
     } catch (error) {
       console.error('Failed to toggle habit completion:', error)
     }
   }
 
   const handleSaveHabit = (updatedHabit: Habit) => {
-    const updatedHabits = habits.map((h) => (h.id === updatedHabit.id ? updatedHabit : h))
-    onUpdate(updatedHabits)
+    onUpdate(updatedHabit)
     setEditingHabit(null)
   }
 

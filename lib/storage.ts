@@ -6,8 +6,7 @@ import {
   updateHabit as apiUpdateHabit,
   deleteHabit as apiDeleteHabit,
   toggleHabitCompletion as apiToggleHabitCompletion,
-  syncHabits,
-  ApiError 
+  syncHabits
 } from "@/lib/api"
 
 const STORAGE_KEY = "habit_app_habits_v1"
@@ -123,6 +122,26 @@ export async function addHabit(input: HabitInput): Promise<Habit> {
   } catch (error) {
     throw error
   }
+}
+
+export async function updateHabit(habit: Habit): Promise<Habit> {
+    const { isAuthenticated } = getAuthState()
+
+    if (!isAuthenticated) {
+        // TODO implement
+        return habit
+    }
+
+    try {
+        const habitInput: HabitInput = {
+            name: habit.name,
+            days: habit.days,
+            time: habit.time
+        }
+        return await apiUpdateHabit(habit.id, habitInput)
+    } catch (error) {
+        throw error
+    }
 }
 
 // Delete a habit
