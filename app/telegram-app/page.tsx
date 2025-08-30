@@ -239,6 +239,10 @@ function TelegramHabitAppContent() {
                   : "Running in offline mode. Data is stored locally in your browser."
                 }
               </p>
+              <div>Environment: {typeof window !== 'undefined' ? '🌐 Browser' : '🖥️ Server'} • 
+                Mobile: {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? '📱 Yes' : '💻 No'}
+              </div>
+              <div>Mobile Mode: {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Active (expandable names)' : 'Inactive (tooltips)'}</div>
               <p className="text-xs">
                 {tg 
                   ? `Telegram WebApp • ${isAuthenticated ? "Backend Connected" : "Offline Mode"}`

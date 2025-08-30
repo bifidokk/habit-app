@@ -1,14 +1,32 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import { isHabitActiveToday, isHabitCompletedToday } from "@/lib/storage"
 import type { Habit } from "@/types/habit"
-import { CheckCircle2, Circle, Clock } from "lucide-react"
+import { CheckCircle2, Circle, Clock, ChevronRight, ChevronUp } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export function TodaySummary({ habits }: { habits: Habit[] }) {
+  const [expandedNames, setExpandedNames] = useState<Set<string>>(new Set())
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const isLongName = (name: string) => name.length > 50
+
+  const toggleNameExpansion = (habitId: string) => {
+    setExpandedNames(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(habitId)) {
+        newSet.delete(habitId)
+      } else {
+        newSet.add(habitId)
+      }
+      return newSet
+    })
+  }
+
   const todayStats = useMemo(() => {
     const activeToday = habits.filter(isHabitActiveToday)
     const completedToday = activeToday.filter(isHabitCompletedToday)
@@ -63,6 +81,7 @@ export function TodaySummary({ habits }: { habits: Habit[] }) {
         <div className="space-y-2">
           {todayStats.activeHabits.map((habit) => {
             const isCompleted = isHabitCompletedToday(habit)
+            const isExpanded = expandedNames.has(habit.id)
             return (
               <div key={habit.id} className="flex items-center gap-2 text-sm">
                 {isCompleted ? (
@@ -70,7 +89,33 @@ export function TodaySummary({ habits }: { habits: Habit[] }) {
                 ) : (
                   <Circle className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span className={isCompleted ? "text-green-400" : "text-foreground"}>{habit.name}</span>
+                <span className={cn(
+                  "block transition-all duration-200 ease-in-out",
+                  isExpanded 
+                    ? "whitespace-normal text-foreground" 
+                    : "truncate max-w-[180px] text-foreground/90"
+                )} title={habit.name}>
+                  {isExpanded ? habit.name : `${habit.name.substring(0, 50)}${habit.name.length > 50 ? "..." : ""}`}
+                </span>
+                {isLongName(habit.name) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleNameExpansion(habit.id)}
+                    className={cn(
+                      "h-6 w-6 p-0 rounded-full transition-all duration-200",
+                      isExpanded
+                        ? "text-foreground bg-white/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                    )}
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-3 w-3 transition-transform duration-200" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3 transition-transform duration-200" />
+                    )}
+                  </Button>
+                )}
                 <Badge variant="outline" className="ml-auto text-xs">
                   {habit.time}
                 </Badge>

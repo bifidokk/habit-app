@@ -55,9 +55,12 @@ export function HabitForm({
           placeholder="e.g., Drink water"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          maxLength={64}
+          maxLength={255}
           autoComplete="off"
         />
+        <div className="text-xs text-muted-foreground">
+          {name.length}/255 characters
+        </div>
       </div>
 
       <div className="grid gap-2">

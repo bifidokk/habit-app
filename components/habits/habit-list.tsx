@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2, Check, Flame, Target, TrendingUp, ChevronDown, ChevronRight, Edit } from "lucide-react"
+import { Trash2, Check, Flame, Target, TrendingUp, ChevronDown, ChevronRight, Edit, ChevronUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -15,6 +15,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 import { useMemo, useState } from "react"
@@ -38,6 +44,22 @@ export function HabitList({
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null)
   const [editingHabit, setEditingHabit] = useState<string | null>(null)
+  const [expandedNames, setExpandedNames] = useState<Set<string>>(new Set())
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const isLongName = (name: string) => name.length > 50
+
+  const toggleNameExpansion = (habitId: string) => {
+    setExpandedNames(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(habitId)) {
+        newSet.delete(habitId)
+      } else {
+        newSet.add(habitId)
+      }
+      return newSet
+    })
+  }
 
   const handleToggleCompletion = async (habitId: string) => {
     try {
@@ -97,8 +119,7 @@ export function HabitList({
                   <div className="flex items-center pt-0.5">
                     <Checkbox
                       checked={isCompletedToday}
-                      onCheckedChange={(e) => {
-                        e.stopPropagation()
+                      onCheckedChange={() => {
                         handleToggleCompletion(habit.id)
                       }}
                       className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
@@ -109,11 +130,59 @@ export function HabitList({
                 <div className="min-w-0 flex-1">
                   <div
                     className={cn(
-                      "font-medium truncate transition-colors flex items-center gap-2",
+                      "font-medium transition-colors flex items-center gap-2",
                       isCompletedToday && "text-green-400",
                     )}
                   >
-                    {habit.name}
+                    {isMobile && isLongName(habit.name) ? (
+                      // Mobile: Expandable text
+                      <div className="flex items-center gap-1">
+                        <span 
+                          className={cn(
+                            "block transition-all duration-200 ease-in-out",
+                            expandedNames.has(habit.id) 
+                              ? "whitespace-normal text-foreground" 
+                              : "truncate max-w-[150px] text-foreground/90"
+                          )}
+                        >
+                          {habit.name}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "h-6 w-6 p-0 rounded-full transition-all duration-200",
+                            expandedNames.has(habit.id)
+                              ? "text-foreground bg-white/10"
+                              : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleNameExpansion(habit.id)
+                          }}
+                        >
+                          {expandedNames.has(habit.id) ? (
+                            <ChevronUp className="h-3 w-3 transition-transform duration-200" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3 transition-transform duration-200" />
+                          )}
+                        </Button>
+                      </div>
+                    ) : (
+                      // Desktop: Tooltip
+                      <TooltipProvider delayDuration={300}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px] flex-shrink-0 cursor-help" title={habit.name}>
+                              {habit.name}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="break-words">{habit.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                     {isCompletedToday && <Check className="h-4 w-4 text-green-400" />}
                     <div className="flex items-center gap-1 ml-auto">
                       <Badge variant="secondary" className="text-[10px] rounded-full">
