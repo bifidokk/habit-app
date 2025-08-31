@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Plus, Loader2, AlertCircle } from "lucide-react"
+import { Plus, Loader2, AlertCircle, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,6 +23,7 @@ function TelegramHabitAppContent() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showAddForm, setShowAddForm] = useState(false)
   
   const { isAuthenticated, user: authUser, isLoading: authLoading, backendHealthy } = useAuth()
   const tg = getTelegramWebApp()
@@ -159,16 +160,10 @@ function TelegramHabitAppContent() {
             variant="outline"
             size="sm"
             className="rounded-xl border-white/20 bg-white/5 backdrop-blur hover:bg-white/10 transition-colors"
-            onClick={() => {
-              onAdd({
-                name: "Drink water",
-                days: [1, 2, 3, 4, 5],
-                time: "09:00",
-              })
-            }}
+            onClick={() => setShowAddForm(!showAddForm)}
           >
             <Plus className="h-4 w-4 mr-1.5" />
-            Quick add
+            {showAddForm ? 'Hide form' : 'Add habit'}
           </Button>
         </header>
 
@@ -190,15 +185,29 @@ function TelegramHabitAppContent() {
             </Alert>
           )}
           
-          <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-shadow hover:shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
-            <CardHeader className="pb-3">
-              <CardTitle className="tracking-tight">Add a habit</CardTitle>
-              <CardDescription>Set name, days of week, and reminder time.</CardDescription>
+          {showAddForm && (
+            <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+                          <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="tracking-tight">Add a habit</CardTitle>
+                  <CardDescription>Set name, days of week, and reminder time.</CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAddForm(false)}
+                  className="h-8 w-8 p-0 rounded-full hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent>
-              <HabitForm onAdd={onAdd} />
-            </CardContent>
-          </Card>
+              <CardContent>
+                <HabitForm onAdd={onAdd} onSuccess={() => setShowAddForm(false)} />
+              </CardContent>
+            </Card>
+          )}
 
           {!isLoading && <TodaySummary habits={habits} />}
 

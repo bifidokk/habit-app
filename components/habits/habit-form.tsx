@@ -12,8 +12,10 @@ const UI_ORDER = [0, 1, 2, 3, 4, 5, 6] // Mon..Sun
 
 export function HabitForm({
   onAdd = () => {},
+  onSuccess = () => {},
 }: {
   onAdd?: (input: HabitInput) => void
+  onSuccess?: () => void
 }) {
   const [name, setName] = useState("")
   const [days, setDays] = useState<number[]>([0, 1, 2, 3, 4]) // default weekdays
@@ -41,6 +43,7 @@ export function HabitForm({
       setName("")
       setDays([0, 1, 2, 3, 4])
       setTime("09:00")
+      onSuccess()
     } finally {
       setSubmitting(false)
     }
