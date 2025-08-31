@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { cn } from "@/lib/utils"
+import { cn, jsDayToBackendDay } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 
 interface HeatmapDay {
@@ -41,7 +41,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
           date: dateStr,
           dayOfMonth: paddingDate.getDate(),
           isCurrentMonth: false,
-          isScheduled: habit.days.includes(dayOfWeek),
+          isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
           isCompleted: completionMap.get(dateStr) || false,
           dayOfWeek,
         })
@@ -57,7 +57,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
           date: dateStr,
           dayOfMonth: day,
           isCurrentMonth: true,
-          isScheduled: habit.days.includes(dayOfWeek),
+          isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
           isCompleted: completionMap.get(dateStr) || false,
           dayOfWeek,
         })
@@ -76,7 +76,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
           date: dateStr,
           dayOfMonth: paddingDate.getDate(),
           isCurrentMonth: false,
-          isScheduled: habit.days.includes(dayOfWeek),
+          isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
           isCompleted: completionMap.get(dateStr) || false,
           dayOfWeek,
         })

@@ -6,8 +6,8 @@ import {
   deleteHabit as apiDeleteHabit,
   toggleHabitCompletion as apiToggleHabitCompletion
 } from "@/lib/api"
+import { jsDayToBackendDay } from "@/lib/utils"
 
-// Main storage functions - now all backend-based
 export async function getHabits(): Promise<Habit[]> {
   try {
     return await fetchHabits()
@@ -16,7 +16,6 @@ export async function getHabits(): Promise<Habit[]> {
   }
 }
 
-// Create a new habit
 export async function addHabit(input: HabitInput): Promise<Habit> {
   try {
     return await apiCreateHabit(input)
@@ -38,7 +37,6 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
   }
 }
 
-// Delete a habit
 export async function removeHabit(habitId: string): Promise<void> {
   try {
     await apiDeleteHabit(habitId)
@@ -47,7 +45,6 @@ export async function removeHabit(habitId: string): Promise<void> {
   }
 }
 
-// Toggle habit completion
 export async function toggleHabitCompletion(habitId: string, date: string): Promise<void> {
   try {
     const habit = await getHabitById(habitId)
@@ -63,7 +60,6 @@ export async function toggleHabitCompletion(habitId: string, date: string): Prom
   }
 }
 
-// Helper function to get a single habit by ID
 export async function getHabitById(habitId: string): Promise<Habit | null> {
   try {
     const habits = await getHabits()
@@ -73,23 +69,23 @@ export async function getHabitById(habitId: string): Promise<Habit | null> {
   }
 }
 
-// Helper to get today's date string
 export function getTodayDateString(): string {
   return new Date().toISOString().split("T")[0]
 }
 
-// Helper to check if habit is completed today
 export function isHabitCompletedToday(habit: Habit): boolean {
   const today = getTodayDateString()
   const completion = habit.completions?.find((c) => c.date === today)
   return completion?.completed || false
 }
 
-// Helper to check if habit should be active today
 export function isHabitActiveToday(habit: Habit): boolean {
-  const today = new Date().getDay() // 0=Sun, 1=Mon, etc.
-  return habit.days.includes(today)
+  const jsToday = new Date().getDay() // 0=Sun, 1=Mon, etc.
+  const backendToday = jsDayToBackendDay(jsToday) // Convert to backend day system
+  return habit.days.includes(backendToday)
 }
+
+
 
 
 

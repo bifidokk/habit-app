@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
+import { cn, jsDayToBackendDay } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 import { useMemo, useState } from "react"
 import { toggleHabitCompletion, getTodayDateString, isHabitCompletedToday, isHabitActiveToday } from "@/lib/storage"
@@ -226,7 +226,10 @@ export function HabitList({
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     {UI_ORDER.map((d) => {
                       const active = habit.days.includes(d)
-                      const isToday = d === new Date().getDay()
+                      // Convert JavaScript day (0=Sunday) to backend day (0=Monday) for comparison
+                      const jsToday = new Date().getDay()
+                      const backendToday = jsDayToBackendDay(jsToday)
+                      const isToday = d === backendToday
                       return (
                         <Badge
                           key={d}

@@ -1,14 +1,16 @@
 import type { Habit, HabitStats, HabitCompletion } from "@/types/habit"
+import { jsDayToBackendDay, backendDayToJsDay } from "@/lib/utils"
 
-// Get day of week (0=Sun, 1=Mon, etc.) for a date string
+// Get day of week (0=Sun, 1=Mon, etc.) for a date string - JavaScript system
 function getDayOfWeek(dateStr: string): number {
   return new Date(dateStr).getDay()
 }
 
 // Check if a habit should be active on a given date
 function isHabitActiveOnDate(habit: Habit, dateStr: string): boolean {
-  const dayOfWeek = getDayOfWeek(dateStr)
-  return habit.days.includes(dayOfWeek)
+  const jsDayOfWeek = getDayOfWeek(dateStr)
+  const backendDayOfWeek = jsDayToBackendDay(jsDayOfWeek)
+  return habit.days.includes(backendDayOfWeek)
 }
 
 // Get date string for N days ago
@@ -100,23 +102,27 @@ function getWeeklyData(habit: Habit) {
   const completions = habit.completions || []
   const completionMap = new Map(completions.map((c) => [c.date, c.completed]))
 
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  const weeklyData = days.map((day, index) => {
+  // Backend system: 0=Monday, 1=Tuesday, ..., 6=Sunday
+  // JavaScript system: 0=Sunday, 1=Monday, ..., 6=Saturday
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  const weeklyData = days.map((day, backendIndex) => {
     let completed = 0
     let total = 0
 
-    // Check last 4 weeks for this day of week
-    for (let week = 0; week < 4; week++) {
-      const daysBack = week * 7 + (6 - index) // Calculate days back for this day of week
-      const dateStr = getDaysAgo(daysBack)
+      // Check last 4 weeks for this day of week
+      for (let week = 0; week < 4; week++) {
+        // Convert backend index to JavaScript day for date calculation
+        const jsDay = backendDayToJsDay(backendIndex)
+        const daysBack = week * 7 + (6 - jsDay) // Calculate days back for this day of week
+        const dateStr = getDaysAgo(daysBack)
 
-      if (isHabitActiveOnDate(habit, dateStr) && habit.days.includes(index)) {
-        total++
-        if (completionMap.get(dateStr)) {
-          completed++
+        if (isHabitActiveOnDate(habit, dateStr) && habit.days.includes(backendIndex)) {
+          total++
+          if (completionMap.get(dateStr)) {
+            completed++
+          }
         }
       }
-    }
 
     return { day, completed, total }
   })

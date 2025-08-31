@@ -54,7 +54,7 @@ This is a **Telegram Mini App** for habit tracking that also works as a standalo
 ### Data Architecture
 
 #### Core Types (`types/habit.ts`)
-- `Habit` - Main habit entity with days array (0=Sunday, 6=Saturday), time, and completions
+- `Habit` - Main habit entity with days array (0=Monday, 6=Sunday), time, and completions
 - `HabitCompletion` - Tracks completion status for specific dates
 - `HabitStats` - Calculated statistics (streaks, completion rates)
 
