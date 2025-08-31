@@ -33,7 +33,7 @@ This project uses both pnpm and npm - check for `pnpm-lock.yaml` to determine wh
 ## Architecture Overview
 
 ### Core Purpose
-This is a **Telegram Mini App** for habit tracking that also works as a standalone web application. The app stores habits locally via localStorage but is designed to integrate with a PHP backend through Telegram WebApp authentication.
+This is a **Telegram Mini App** for habit tracking that also works as a standalone web application. The app is fully integrated with a PHP backend through Telegram WebApp authentication, with no local storage for habits.
 
 ### Tech Stack
 - **Framework**: Next.js 15.2.4 (App Router)
@@ -59,9 +59,9 @@ This is a **Telegram Mini App** for habit tracking that also works as a standalo
 - `HabitStats` - Calculated statistics (streaks, completion rates)
 
 #### Storage Layer (`lib/storage.ts`)
-- **Current**: localStorage-based storage
-- **Future**: Designed for PHP backend integration via Telegram init data authentication
-- Key functions: `getHabits()`, `saveHabits()`, `toggleHabitCompletion()`
+- **Current**: Backend-based storage via API calls
+- **Architecture**: Direct integration with PHP backend through authenticated API endpoints
+- Key functions: `getHabits()`, `addHabit()`, `updateHabit()`, `removeHabit()`, `toggleHabitCompletion()`
 
 #### Statistics (`lib/stats.ts`)
 - Calculates streaks, completion rates, and weekly data
@@ -111,14 +111,14 @@ This is a **Telegram Mini App** for habit tracking that also works as a standalo
 
 #### State Management
 - React state for UI interactions
-- localStorage for data persistence
+- Backend API for data persistence
 - No external state management library
 
-#### Future Backend Integration
-The app is architected for future PHP backend integration:
-- Replace localStorage calls in `lib/storage.ts` with fetch requests
-- Use Telegram `initData` for authentication
-- Endpoint structure ready for habit CRUD operations
+#### Backend Integration
+The app is fully integrated with a PHP backend:
+- All habit operations go through authenticated API endpoints
+- Uses Telegram `initData` for authentication
+- Complete CRUD operations for habits via backend
 
 #### Mobile-First Design
 - Designed primarily for mobile Telegram usage

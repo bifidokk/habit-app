@@ -178,7 +178,7 @@ function TelegramHabitAppContent() {
             <Alert className="border-yellow-500/20 bg-yellow-500/10">
               <AlertCircle className="h-4 w-4 text-yellow-500" />
               <AlertDescription>
-                Backend is unavailable. Running in offline mode with local storage.
+                Backend is unavailable. The app requires a connection to function.
               </AlertDescription>
             </Alert>
           )}
@@ -237,7 +237,7 @@ function TelegramHabitAppContent() {
               <p>
                 {isAuthenticated 
                   ? `Authenticated as ${userDisplayName}. Data is synced with the backend.`
-                  : "Running in offline mode. Data is stored locally in your browser."
+                  : "Not authenticated. Please authenticate to use the app."
                 }
               </p>
               <div>Environment: {typeof window !== 'undefined' ? '🌐 Browser' : '🖥️ Server'} • 
@@ -246,8 +246,8 @@ function TelegramHabitAppContent() {
               <div>Mobile Mode: {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Active (expandable names)' : 'Inactive (tooltips)'}</div>
               <p className="text-xs">
                 {tg 
-                  ? `Telegram WebApp • ${isAuthenticated ? "Backend Connected" : "Offline Mode"}`
-                  : "Browser Preview • Offline Mode"
+                  ? `Telegram WebApp • ${isAuthenticated ? "Backend Connected" : "Authentication Required"}`
+                  : "Browser Preview • Authentication Required"
                 }
               </p>
               {backendHealthy !== null && (

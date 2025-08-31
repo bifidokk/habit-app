@@ -172,14 +172,7 @@ export async function toggleHabitCompletion(
   })
 }
 
-/**
- * Sync local habits with backend (for migration from localStorage)
- */
-export async function syncHabits(localHabits: Habit[]): Promise<Habit[]> {
-  return apiPost<Habit[]>('/api/habits/sync', {
-    habits: localHabits
-  })
-}
+
 
 /**
  * Health check endpoint to verify backend connectivity

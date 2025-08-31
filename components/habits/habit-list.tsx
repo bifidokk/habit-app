@@ -64,10 +64,15 @@ export function HabitList({
   const handleToggleCompletion = async (habitId: string) => {
     try {
       const today = getTodayDateString()
-      const updatedHabits = await toggleHabitCompletion(habitId, today)
-      // onUpdate(updatedHabits)
+      await toggleHabitCompletion(habitId, today)
+      // The parent component will refresh the habits list
+      // We can call onUpdate with the current habit to trigger a refresh
+      const currentHabit = habits.find(h => h.id === habitId)
+      if (currentHabit) {
+        onUpdate(currentHabit)
+      }
     } catch (error) {
-      console.error('Failed to toggle habit completion:', error)
+      // Error handling is done by the parent component
     }
   }
 
