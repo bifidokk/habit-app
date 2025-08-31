@@ -5,12 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { isHabitActiveToday, isHabitCompletedToday } from "@/lib/storage"
+import { isHabitActiveToday, isHabitCompletedToday, completeHabit, getTodayDateString } from "@/lib/storage"
 import type { Habit } from "@/types/habit"
-import { CheckCircle2, Circle, Clock, ChevronRight, ChevronUp } from "lucide-react"
+import { Clock, ChevronRight, ChevronUp, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
-export function TodaySummary({ habits }: { habits: Habit[] }) {
+export function TodaySummary({ 
+  habits, 
+  onUpdate 
+}: { 
+  habits: Habit[]
+  onUpdate?: (updatedHabit: Habit) => void
+}) {
   const [expandedNames, setExpandedNames] = useState<Set<string>>(new Set())
   const isLongName = (name: string) => name.length > 50
 
@@ -24,6 +41,20 @@ export function TodaySummary({ habits }: { habits: Habit[] }) {
       }
       return newSet
     })
+  }
+
+  const handleCompleteHabit = async (habitId: string) => {
+    try {
+      const today = getTodayDateString()
+      const updatedHabit = await completeHabit(habitId, today)
+      
+      // Notify parent component with the updated habit
+      if (onUpdate) {
+        onUpdate(updatedHabit)
+      }
+    } catch (error) {
+      console.error('Failed to complete habit:', error)
+    }
   }
 
   const todayStats = useMemo(() => {
@@ -83,10 +114,40 @@ export function TodaySummary({ habits }: { habits: Habit[] }) {
             const isExpanded = expandedNames.has(habit.id)
             return (
               <div key={habit.id} className="flex items-center gap-2 text-sm">
-                {isCompleted ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-400" />
+                {!isCompleted ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 rounded-full hover:bg-green-500/20 hover:text-green-400 transition-colors"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Complete Habit</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to mark "{habit.name}" as completed for today?
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleCompleteHabit(habit.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Complete Habit
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 ) : (
-                  <Circle className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-6 w-6 flex items-center justify-center">
+                    <Check className="h-4 w-4 text-green-500" />
+                  </div>
                 )}
                 <span className={cn(
                   "block transition-all duration-200 ease-in-out",

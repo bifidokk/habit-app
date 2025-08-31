@@ -61,7 +61,7 @@ This is a **Telegram Mini App** for habit tracking that also works as a standalo
 #### Storage Layer (`lib/storage.ts`)
 - **Current**: Backend-based storage via API calls
 - **Architecture**: Direct integration with PHP backend through authenticated API endpoints
-- Key functions: `getHabits()`, `addHabit()`, `updateHabit()`, `removeHabit()`, `toggleHabitCompletion()`
+- Key functions: `getHabits()`, `addHabit()`, `updateHabit()`, `removeHabit()`, `completeHabit()`
 
 #### Statistics (`lib/stats.ts`)
 - Calculates streaks, completion rates, and weekly data

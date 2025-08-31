@@ -45,16 +45,10 @@ export async function removeHabit(habitId: string): Promise<void> {
   }
 }
 
-export async function toggleHabitCompletion(habitId: string, date: string): Promise<void> {
+export async function completeHabit(habitId: string, date: string): Promise<Habit> {
   try {
-    const habit = await getHabitById(habitId)
-    if (!habit) throw new Error('Habit not found')
-    
-    const completions = habit.completions || []
-    const existingCompletion = completions.find((c) => c.date === date)
-    const newCompletionStatus = existingCompletion ? !existingCompletion.completed : true
-    
-    await apiToggleHabitCompletion(habitId, date, newCompletionStatus)
+    // Mark habit as completed for the given date
+    return await apiToggleHabitCompletion(habitId, date, true)
   } catch (error) {
     throw error
   }

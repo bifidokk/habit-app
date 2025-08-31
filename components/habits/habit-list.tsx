@@ -3,7 +3,6 @@
 import { Trash2, Check, Flame, Target, TrendingUp, ChevronDown, ChevronRight, Edit, ChevronUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +23,7 @@ import {
 import { cn, jsDayToBackendDay } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 import { useMemo, useState } from "react"
-import { toggleHabitCompletion, getTodayDateString, isHabitCompletedToday, isHabitActiveToday } from "@/lib/storage"
+import { completeHabit, getTodayDateString, isHabitCompletedToday, isHabitActiveToday } from "@/lib/storage"
 import { calculateHabitStats, generateMockCompletions } from "@/lib/stats"
 import { HabitHeatmap } from "./habit-heatmap"
 import { HabitEditForm } from "./habit-edit-form"
@@ -61,16 +60,12 @@ export function HabitList({
     })
   }
 
-  const handleToggleCompletion = async (habitId: string) => {
+  const handleCompleteHabit = async (habitId: string) => {
     try {
       const today = getTodayDateString()
-      await toggleHabitCompletion(habitId, today)
-      // The parent component will refresh the habits list
-      // We can call onUpdate with the current habit to trigger a refresh
-      const currentHabit = habits.find(h => h.id === habitId)
-      if (currentHabit) {
-        onUpdate(currentHabit)
-      }
+      const updatedHabit = await completeHabit(habitId, today)
+      // Pass the updated habit to the parent component
+      onUpdate(updatedHabit)
     } catch (error) {
       // Error handling is done by the parent component
     }
@@ -129,16 +124,38 @@ export function HabitList({
               aria-label={`Toggle details for habit: ${habit.name}`}
             >
               <div className="flex items-start gap-3 min-w-0 flex-1">
-                {isActiveToday && (
+                {isActiveToday && !isCompletedToday && (
                   <div className="flex items-center pt-0.5">
-                    <Checkbox
-                      checked={isCompletedToday}
-                      onCheckedChange={() => {
-                        handleToggleCompletion(habit.id)
-                      }}
-                      className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
-                      onClick={(e) => e.stopPropagation()}
-                    />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded-full hover:bg-green-500/20 hover:text-green-400 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Complete Habit</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to mark "{habit.name}" as completed for today?
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleCompleteHabit(habit.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            Complete Habit
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 )}
                 <div className="min-w-0 flex-1">

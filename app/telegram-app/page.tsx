@@ -209,12 +209,11 @@ function TelegramHabitAppContent() {
             </Card>
           )}
 
-          {!isLoading && <TodaySummary habits={habits} />}
+          {!isLoading && <TodaySummary habits={habits} onUpdate={onUpdate} />}
 
           <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
             <CardHeader className="pb-3">
               <CardTitle className="tracking-tight">Your habits</CardTitle>
-              <CardDescription>Tap the trash icon to remove a habit.</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -238,9 +237,6 @@ function TelegramHabitAppContent() {
           <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
             <CardHeader className="pb-3">
               <CardTitle>About</CardTitle>
-              <CardDescription>
-                Cozy Mini App UI. Theming syncs with Telegram, falls back to a purple/black/white scheme.
-              </CardDescription>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
               <p>
