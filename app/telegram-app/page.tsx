@@ -152,7 +152,7 @@ function TelegramHabitAppContent() {
               Habits
             </h1>
             <p className="text-sm text-muted-foreground truncate">
-              {tg ? "Telegram WebApp" : "Browser preview"} • {userDisplayName}
+              {userDisplayName}
             </p>
           </div>
           <Button
