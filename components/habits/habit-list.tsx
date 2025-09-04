@@ -24,7 +24,7 @@ import { cn, jsDayToBackendDay } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 import { useMemo, useState } from "react"
 import { completeHabit, getTodayDateString, isHabitCompletedToday, isHabitActiveToday } from "@/lib/storage"
-import { calculateHabitStats, generateMockCompletions } from "@/lib/stats"
+import { calculateHabitStats } from "@/lib/stats"
 import { HabitHeatmap } from "./habit-heatmap"
 import { HabitEditForm } from "./habit-edit-form"
 
@@ -64,10 +64,9 @@ export function HabitList({
     try {
       const today = getTodayDateString()
       const updatedHabit = await completeHabit(habitId, today)
-      // Pass the updated habit to the parent component
       onUpdate(updatedHabit)
     } catch (error) {
-      // Error handling is done by the parent component
+      console.error('Failed to complete habit:', error)
     }
   }
 
@@ -90,11 +89,7 @@ export function HabitList({
         const isExpanded = expandedHabit === habit.id
 
         // Calculate stats for this habit
-        const habitWithCompletions = {
-          ...habit,
-          completions: habit.completions?.length ? habit.completions : generateMockCompletions(habit),
-        }
-        const stats = calculateHabitStats(habitWithCompletions)
+        const stats = calculateHabitStats(habit)
 
         return (
           <div
@@ -357,7 +352,7 @@ export function HabitList({
                     {/* 3-month heatmap */}
                     <div>
                       <h4 className="text-sm font-medium mb-3 text-muted-foreground">Last 3 Months</h4>
-                      <HabitHeatmap habit={habitWithCompletions} />
+                      <HabitHeatmap habit={habit} />
                     </div>
                   </>
                 )}

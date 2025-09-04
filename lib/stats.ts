@@ -1,4 +1,4 @@
-import type { Habit, HabitStats, HabitCompletion } from "@/types/habit"
+import type { Habit, HabitStats } from "@/types/habit"
 import { jsDayToBackendDay, backendDayToJsDay } from "@/lib/utils"
 
 // Get day of week (0=Sun, 1=Mon, etc.) for a date string - JavaScript system
@@ -143,20 +143,3 @@ export function calculateHabitStats(habit: Habit): HabitStats {
   }
 }
 
-// Generate mock completion data for demo purposes
-export function generateMockCompletions(habit: Habit): HabitCompletion[] {
-  const completions: HabitCompletion[] = []
-
-  // Generate last 60 days of mock data
-  for (let i = 0; i < 60; i++) {
-    const dateStr = getDaysAgo(i)
-
-    if (isHabitActiveOnDate(habit, dateStr)) {
-      // 70% chance of completion for demo
-      const completed = Math.random() > 0.3
-      completions.push({ date: dateStr, completed })
-    }
-  }
-
-  return completions
-}

@@ -5,22 +5,16 @@ import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { calculateHabitStats, generateMockCompletions } from "@/lib/stats"
+import { calculateHabitStats } from "@/lib/stats"
 import type { Habit } from "@/types/habit"
 import { Flame, Target, TrendingUp, Calendar } from "lucide-react"
 
 export function HabitStats({ habits }: { habits: Habit[] }) {
   const statsData = useMemo(() => {
     return habits.map((habit) => {
-      // Add mock completions for demo if none exist
-      const habitWithCompletions = {
-        ...habit,
-        completions: habit.completions?.length ? habit.completions : generateMockCompletions(habit),
-      }
-
       return {
-        habit: habitWithCompletions,
-        stats: calculateHabitStats(habitWithCompletions),
+        habit,
+        stats: calculateHabitStats(habit),
       }
     })
   }, [habits])
