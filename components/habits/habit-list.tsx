@@ -245,10 +245,10 @@ export function HabitList({
                       return (
                         <Badge
                           key={d}
-                          variant={active ? "default" : "outline"}
+                          variant="outline"
                           className={cn(
                             "text-[11px] rounded-full",
-                            active ? "bg-purple-500/90 text-white" : "border-purple-300/30 text-purple-300/80",
+                            active ? "bg-purple-500/90 text-white border-purple-500/90" : "border-purple-300/30 text-purple-300/80",
                             isToday && active && "ring-2 ring-purple-400/50",
                           )}
                         >

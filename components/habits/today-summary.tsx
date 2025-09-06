@@ -89,7 +89,13 @@ export function TodaySummary({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="tracking-tight">Today's Progress</CardTitle>
-          <Badge variant={todayStats.completionRate === 100 ? "default" : "secondary"} className="rounded-full">
+          <Badge 
+            variant="secondary" 
+            className={cn(
+              "rounded-full",
+              todayStats.completionRate === 100 && "bg-purple-500/90 text-white border-purple-500/90"
+            )}
+          >
             {todayStats.completed}/{todayStats.total}
           </Badge>
         </div>
