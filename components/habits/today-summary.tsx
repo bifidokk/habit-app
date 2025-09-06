@@ -120,7 +120,7 @@ export function TodaySummary({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 rounded-full hover:bg-green-500/20 hover:text-green-400 transition-colors"
+                        className="h-6 w-6 p-0 rounded-full hover:bg-purple-500/20 hover:text-purple-400 transition-colors"
                       >
                         <Check className="h-4 w-4" />
                       </Button>
@@ -137,7 +137,7 @@ export function TodaySummary({
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleCompleteHabit(habit.id)}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-purple-600 hover:bg-purple-700"
                         >
                           Complete Habit
                         </AlertDialogAction>
@@ -146,7 +146,7 @@ export function TodaySummary({
                   </AlertDialog>
                 ) : (
                   <div className="h-6 w-6 flex items-center justify-center">
-                    <Check className="h-4 w-4 text-green-500" />
+                    <Check className="h-4 w-4 text-purple-500" />
                   </div>
                 )}
                 <span className={cn(

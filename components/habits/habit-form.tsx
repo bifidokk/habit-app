@@ -77,7 +77,7 @@ export function HabitForm({
               className={cn(
                 "px-3 py-1.5 rounded-md border text-sm transition-colors",
                 days.includes(d)
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-purple-500 text-white border-purple-500"
                   : "bg-background hover:bg-muted border-muted-foreground/20"
               )}
               aria-pressed={days.includes(d)}
@@ -101,7 +101,7 @@ export function HabitForm({
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={!canSubmit || submitting}>
+        <Button type="submit" disabled={!canSubmit || submitting} className="bg-purple-600 hover:bg-purple-700 text-white">
           {submitting ? "Adding..." : "Add habit"}
         </Button>
         <Button

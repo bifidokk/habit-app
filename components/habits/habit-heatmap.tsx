@@ -13,6 +13,14 @@ interface HeatmapDay {
   dayOfWeek: number
 }
 
+// Helper function to format date as YYYY-MM-DD in local timezone
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function HabitHeatmap({ habit }: { habit: Habit }) {
   const heatmapData = useMemo(() => {
     const today = new Date()
@@ -29,53 +37,16 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
 
       const monthDays: HeatmapDay[] = []
 
-      // Add padding days from previous month to start on Sunday
-      const firstDayOfWeek = monthStart.getDay()
-      for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-        const paddingDate = new Date(monthStart)
-        paddingDate.setDate(paddingDate.getDate() - i - 1)
-        const dateStr = paddingDate.toISOString().split("T")[0]
-        const dayOfWeek = paddingDate.getDay()
-
-        monthDays.push({
-          date: dateStr,
-          dayOfMonth: paddingDate.getDate(),
-          isCurrentMonth: false,
-          isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
-          isCompleted: completionMap.get(dateStr) || false,
-          dayOfWeek,
-        })
-      }
-
-      // Add actual month days
+      // Add only actual month days
       for (let day = 1; day <= monthEnd.getDate(); day++) {
         const date = new Date(monthStart.getFullYear(), monthStart.getMonth(), day)
-        const dateStr = date.toISOString().split("T")[0]
+        const dateStr = formatDateLocal(date)
         const dayOfWeek = date.getDay()
 
         monthDays.push({
           date: dateStr,
           dayOfMonth: day,
           isCurrentMonth: true,
-          isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
-          isCompleted: completionMap.get(dateStr) || false,
-          dayOfWeek,
-        })
-      }
-
-      // Add padding days from next month to complete the grid
-      const lastDayOfWeek = monthEnd.getDay()
-      const remainingDays = 6 - lastDayOfWeek
-      for (let i = 1; i <= remainingDays; i++) {
-        const paddingDate = new Date(monthEnd)
-        paddingDate.setDate(paddingDate.getDate() + i)
-        const dateStr = paddingDate.toISOString().split("T")[0]
-        const dayOfWeek = paddingDate.getDay()
-
-        monthDays.push({
-          date: dateStr,
-          dayOfMonth: paddingDate.getDate(),
-          isCurrentMonth: false,
           isScheduled: habit.days.includes(jsDayToBackendDay(dayOfWeek)),
           isCompleted: completionMap.get(dateStr) || false,
           dayOfWeek,
@@ -89,18 +60,39 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
   }, [habit])
 
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const dayNames = ["S", "M", "T", "W", "T", "F", "S"]
+  const dayNames = ["M", "T", "W", "T", "F", "S", "S"]
 
   return (
     <div className="space-y-6">
-      {heatmapData.map((monthDays, monthIndex) => {
+      {heatmapData.slice().reverse().map((monthDays, monthIndex) => {
         const monthDate = new Date()
-        monthDate.setMonth(monthDate.getMonth() - (2 - monthIndex))
+        monthDate.setMonth(monthDate.getMonth() - (2 - (heatmapData.length - 1 - monthIndex)))
         const monthName = monthNames[monthDate.getMonth()]
 
-        // Group days into weeks
+        // Group days into weeks, handling months that don't start on Monday
         const weeks: HeatmapDay[][] = []
-        for (let i = 0; i < monthDays.length; i += 7) {
+        const firstDayOfWeek = monthDays.length > 0 ? new Date(monthDays[0].date).getDay() : 0
+        const daysToPad = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1
+        
+        // Add empty cells for days before the first day of the month
+        const firstWeek: HeatmapDay[] = []
+        for (let i = 0; i < daysToPad; i++) {
+          firstWeek.push({
+            date: '',
+            dayOfMonth: 0,
+            isCurrentMonth: false,
+            isScheduled: false,
+            isCompleted: false,
+            dayOfWeek: i,
+          })
+        }
+        
+        // Add the actual month days
+        firstWeek.push(...monthDays.slice(0, 7 - daysToPad))
+        weeks.push(firstWeek)
+        
+        // Add remaining weeks
+        for (let i = 7 - daysToPad; i < monthDays.length; i += 7) {
           weeks.push(monthDays.slice(i, i + 7))
         }
 
@@ -126,38 +118,21 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="grid grid-cols-7 gap-2">
                   {week.map((day, dayIndex) => {
-                    const isToday = day.date === new Date().toISOString().split("T")[0]
+                    const isToday = day.date === formatDateLocal(new Date())
 
                     return (
                       <div
                         key={dayIndex}
                         className={cn(
                           "w-6 h-6 rounded-md transition-all duration-200 border-2 relative group cursor-pointer",
-                          // Base styling
-                          !day.isCurrentMonth && "opacity-20",
+                          // Empty cells (padding)
+                          !day.date && "opacity-0",
                           // Not scheduled days
-                          !day.isScheduled &&
-                            day.isCurrentMonth &&
-                            "bg-muted/20 border-muted-foreground/10 hover:border-muted-foreground/20",
-                          !day.isScheduled && !day.isCurrentMonth && "bg-muted/10 border-muted-foreground/5",
-                          // Scheduled but not completed
-                          day.isScheduled &&
-                            !day.isCompleted &&
-                            day.isCurrentMonth &&
-                            "bg-muted/40 border-muted-foreground/20 hover:border-muted-foreground/30",
-                          day.isScheduled &&
-                            !day.isCompleted &&
-                            !day.isCurrentMonth &&
-                            "bg-muted/20 border-muted-foreground/10",
-                          // Completed days - beautiful purple gradient
-                          day.isScheduled &&
-                            day.isCompleted &&
-                            day.isCurrentMonth &&
-                            "bg-gradient-to-br from-purple-500 to-fuchsia-500 border-purple-400 shadow-sm shadow-purple-500/20 hover:shadow-md hover:shadow-purple-500/30 hover:scale-105",
-                          day.isScheduled &&
-                            day.isCompleted &&
-                            !day.isCurrentMonth &&
-                            "bg-gradient-to-br from-purple-500/60 to-fuchsia-500/60 border-purple-400/60",
+                          day.date && !day.isScheduled && "bg-muted/20 border-muted-foreground/10 hover:border-muted-foreground/20",
+                          // Scheduled but not completed (missed)
+                          day.date && day.isScheduled && !day.isCompleted && "bg-muted/40 border-purple-300/40 hover:border-purple-300/60",
+                          // Completed days - purple gradient
+                          day.date && day.isScheduled && day.isCompleted && "bg-gradient-to-br from-purple-500 to-violet-500 border-purple-400 shadow-sm shadow-purple-500/20 hover:shadow-md hover:shadow-purple-500/30 hover:scale-105",
                           // Today indicator
                           isToday && "ring-2 ring-purple-300/50 ring-offset-1 ring-offset-background",
                         )}
@@ -166,7 +141,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                         }`}
                       >
                         {/* Day number for current month */}
-                        {day.isCurrentMonth && (
+                        {day.date && (
                           <span
                             className={cn(
                               "absolute inset-0 flex items-center justify-center text-xs font-medium transition-colors",
@@ -177,12 +152,6 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                           </span>
                         )}
 
-                        {/* Completion indicator */}
-                        {day.isScheduled && day.isCompleted && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center shadow-sm">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                          </div>
-                        )}
                       </div>
                     )
                   })}
@@ -201,11 +170,11 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
             <span className="text-muted-foreground">Not scheduled</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-muted/40 border-2 border-muted-foreground/20"></div>
+            <div className="w-4 h-4 rounded-md bg-muted/40 border-2 border-purple-300/40"></div>
             <span className="text-muted-foreground">Missed</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-gradient-to-br from-purple-500 to-fuchsia-500 border-2 border-purple-400 shadow-sm shadow-purple-500/20"></div>
+            <div className="w-4 h-4 rounded-md bg-gradient-to-br from-purple-500 to-violet-500 border-2 border-purple-400 shadow-sm shadow-purple-500/20"></div>
             <span className="text-muted-foreground">Completed</span>
           </div>
         </div>

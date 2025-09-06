@@ -60,9 +60,9 @@ export function HabitStats({ habits }: { habits: Habit[] }) {
           <Card className="rounded-xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <TrendingUp className="h-5 w-5 text-fuchsia-400" />
+                <TrendingUp className="h-5 w-5 text-purple-400" />
               </div>
-              <div className="text-2xl font-bold text-fuchsia-300">{overallStats.avgCompletionRate}%</div>
+              <div className="text-2xl font-bold text-purple-300">{overallStats.avgCompletionRate}%</div>
               <div className="text-xs text-muted-foreground">Avg completion</div>
             </CardContent>
           </Card>
@@ -70,9 +70,9 @@ export function HabitStats({ habits }: { habits: Habit[] }) {
           <Card className="rounded-xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <Flame className="h-5 w-5 text-orange-400" />
+                <Flame className="h-5 w-5 text-purple-400" />
               </div>
-              <div className="text-2xl font-bold text-orange-300">{overallStats.longestStreak}</div>
+              <div className="text-2xl font-bold text-purple-300">{overallStats.longestStreak}</div>
               <div className="text-xs text-muted-foreground">Longest streak</div>
             </CardContent>
           </Card>
@@ -80,9 +80,9 @@ export function HabitStats({ habits }: { habits: Habit[] }) {
           <Card className="rounded-xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <Calendar className="h-5 w-5 text-green-400" />
+                <Calendar className="h-5 w-5 text-purple-400" />
               </div>
-              <div className="text-2xl font-bold text-green-300">{overallStats.activeStreaks}</div>
+              <div className="text-2xl font-bold text-purple-300">{overallStats.activeStreaks}</div>
               <div className="text-xs text-muted-foreground">Active streaks</div>
             </CardContent>
           </Card>

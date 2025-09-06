@@ -96,7 +96,7 @@ export function HabitList({
             key={habit.id}
             className={cn(
               "rounded-xl border border-white/10 bg-white/5 backdrop-blur shadow-sm shadow-purple-900/10 transition-all",
-              isCompletedToday && "bg-green-500/10 border-green-400/20",
+              isCompletedToday && "bg-purple-500/10 border-purple-400/20",
               isExpanded && "bg-white/10",
             )}
           >
@@ -126,7 +126,7 @@ export function HabitList({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 rounded-full hover:bg-green-500/20 hover:text-green-400 transition-colors"
+                          className="h-6 w-6 p-0 rounded-full hover:bg-purple-500/20 hover:text-purple-400 transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Check className="h-4 w-4" />
@@ -144,7 +144,7 @@ export function HabitList({
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleCompleteHabit(habit.id)}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-purple-600 hover:bg-purple-700"
                           >
                             Complete Habit
                           </AlertDialogAction>
@@ -157,7 +157,7 @@ export function HabitList({
                   <div
                     className={cn(
                       "font-medium transition-colors flex items-center gap-2",
-                      isCompletedToday && "text-green-400",
+                      isCompletedToday && "text-purple-400",
                     )}
                   >
                     {isMobile && isLongName(habit.name) ? (
@@ -209,7 +209,7 @@ export function HabitList({
                         </Tooltip>
                       </TooltipProvider>
                     )}
-                    {isCompletedToday && <Check className="h-4 w-4 text-green-400" />}
+                    {isCompletedToday && <Check className="h-4 w-4 text-purple-400" />}
                     <div className="flex items-center gap-1 ml-auto">
                       <Badge variant="secondary" className="text-[10px] rounded-full">
                         <Flame className="h-3 w-3 mr-1" />
@@ -248,7 +248,7 @@ export function HabitList({
                           variant={active ? "default" : "outline"}
                           className={cn(
                             "text-[11px] rounded-full",
-                            active ? "bg-primary/90 text-primary-foreground" : "border-primary/30 text-primary/80",
+                            active ? "bg-purple-500/90 text-white" : "border-purple-300/30 text-purple-300/80",
                             isToday && active && "ring-2 ring-purple-400/50",
                           )}
                         >
@@ -328,9 +328,9 @@ export function HabitList({
                     <div className="grid grid-cols-3 gap-3">
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-1">
-                          <Flame className="h-4 w-4 text-orange-400" />
+                          <Flame className="h-4 w-4 text-purple-400" />
                         </div>
-                        <div className="text-lg font-bold text-orange-300">{stats.currentStreak}</div>
+                        <div className="text-lg font-bold text-purple-300">{stats.currentStreak}</div>
                         <div className="text-xs text-muted-foreground">Current</div>
                       </div>
                       <div className="text-center">
@@ -342,9 +342,9 @@ export function HabitList({
                       </div>
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-1">
-                          <TrendingUp className="h-4 w-4 text-fuchsia-400" />
+                          <TrendingUp className="h-4 w-4 text-purple-400" />
                         </div>
-                        <div className="text-lg font-bold text-fuchsia-300">{stats.completionRate}%</div>
+                        <div className="text-lg font-bold text-purple-300">{stats.completionRate}%</div>
                         <div className="text-xs text-muted-foreground">Rate</div>
                       </div>
                     </div>

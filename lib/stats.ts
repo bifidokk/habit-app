@@ -1,6 +1,14 @@
 import type { Habit, HabitStats } from "@/types/habit"
 import { jsDayToBackendDay, backendDayToJsDay } from "@/lib/utils"
 
+// Helper function to format date as YYYY-MM-DD in local timezone
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Get day of week (0=Sun, 1=Mon, etc.) for a date string - JavaScript system
 function getDayOfWeek(dateStr: string): number {
   return new Date(dateStr).getDay()
@@ -17,7 +25,7 @@ function isHabitActiveOnDate(habit: Habit, dateStr: string): boolean {
 function getDaysAgo(days: number): string {
   const date = new Date()
   date.setDate(date.getDate() - days)
-  return date.toISOString().split("T")[0]
+  return formatDateLocal(date)
 }
 
 // Calculate current streak (consecutive days completed)
@@ -31,7 +39,7 @@ function calculateCurrentStreak(habit: Habit): number {
   // Go backwards from today
   for (let i = 0; i < 365; i++) {
     // Max 1 year lookback
-    const dateStr = currentDate.toISOString().split("T")[0]
+    const dateStr = formatDateLocal(currentDate)
 
     if (isHabitActiveOnDate(habit, dateStr)) {
       const completed = completionMap.get(dateStr) || false
@@ -109,20 +117,25 @@ function getWeeklyData(habit: Habit) {
     let completed = 0
     let total = 0
 
-      // Check last 4 weeks for this day of week
-      for (let week = 0; week < 4; week++) {
-        // Convert backend index to JavaScript day for date calculation
-        const jsDay = backendDayToJsDay(backendIndex)
-        const daysBack = week * 7 + (6 - jsDay) // Calculate days back for this day of week
-        const dateStr = getDaysAgo(daysBack)
+    // Check last 4 weeks for this day of week
+    for (let week = 0; week < 4; week++) {
+      // Convert backend index to JavaScript day for date calculation
+      const jsDay = backendDayToJsDay(backendIndex)
+      
+      // Calculate days back to get to this day of week
+      // For Monday (jsDay=1): daysBack = week * 7 + (1 - 1) = week * 7
+      // For Tuesday (jsDay=2): daysBack = week * 7 + (2 - 1) = week * 7 + 1
+      // etc.
+      const daysBack = week * 7 + (jsDay - 1)
+      const dateStr = getDaysAgo(daysBack)
 
-        if (isHabitActiveOnDate(habit, dateStr) && habit.days.includes(backendIndex)) {
-          total++
-          if (completionMap.get(dateStr)) {
-            completed++
-          }
+      if (isHabitActiveOnDate(habit, dateStr) && habit.days.includes(backendIndex)) {
+        total++
+        if (completionMap.get(dateStr)) {
+          completed++
         }
       }
+    }
 
     return { day, completed, total }
   })

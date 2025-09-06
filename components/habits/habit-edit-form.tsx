@@ -94,7 +94,7 @@ export function HabitEditForm({
               className={cn(
                 "px-3 py-1.5 rounded-md border text-sm transition-colors",
                 days.includes(d)
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-purple-500 text-white border-purple-500"
                   : "bg-background hover:bg-muted border-muted-foreground/20",
               )}
               aria-pressed={days.includes(d)}
@@ -121,7 +121,7 @@ export function HabitEditForm({
       </div>
 
       <div className="flex gap-2 pt-2">
-        <Button onClick={handleSave} disabled={!canSave || !hasChanges || saving} className="rounded-xl" size="sm">
+        <Button onClick={handleSave} disabled={!canSave || !hasChanges || saving} className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white" size="sm">
           {saving ? "Saving..." : "Save changes"}
         </Button>
         <Button variant="outline" onClick={handleCancel} className="rounded-xl bg-transparent" size="sm">
