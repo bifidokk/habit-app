@@ -350,9 +350,11 @@ export function HabitList({
                     </div>
 
                     {/* 3-month heatmap */}
-                    <div>
+                    <div className="overflow-x-auto">
                       <h4 className="text-sm font-medium mb-3 text-muted-foreground">Last 3 Months</h4>
-                      <HabitHeatmap habit={habit} />
+                      <div className="min-w-0">
+                        <HabitHeatmap habit={habit} />
+                      </div>
                     </div>
                   </>
                 )}

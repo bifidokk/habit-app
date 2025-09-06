@@ -63,7 +63,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
   const dayNames = ["M", "T", "W", "T", "F", "S", "S"]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {heatmapData.slice().reverse().map((monthDays, monthIndex) => {
         const monthDate = new Date()
         monthDate.setMonth(monthDate.getMonth() - (2 - (heatmapData.length - 1 - monthIndex)))
@@ -97,17 +97,17 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
         }
 
         return (
-          <div key={monthIndex} className="space-y-3">
+          <div key={monthIndex} className="space-y-2 sm:space-y-3">
             <div className="text-sm font-semibold text-foreground">
               {monthName} {monthDate.getFullYear()}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {/* Day headers */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {dayNames.map((day, i) => (
                   <div
                     key={i}
-                    className="text-xs text-muted-foreground text-center w-6 h-6 flex items-center justify-center font-medium"
+                    className="text-xs text-muted-foreground text-center w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center font-medium"
                   >
                     {day}
                   </div>
@@ -116,7 +116,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
 
               {/* Calendar grid */}
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="grid grid-cols-7 gap-2">
+                <div key={weekIndex} className="grid grid-cols-7 gap-1 sm:gap-2">
                   {week.map((day, dayIndex) => {
                     const isToday = day.date === formatDateLocal(new Date())
 
@@ -124,7 +124,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                       <div
                         key={dayIndex}
                         className={cn(
-                          "w-6 h-6 rounded-md transition-all duration-200 border-2 relative group cursor-pointer",
+                          "w-5 h-5 sm:w-6 sm:h-6 rounded-md transition-all duration-200 border-2 relative group cursor-pointer",
                           // Empty cells (padding)
                           !day.date && "opacity-0",
                           // Not scheduled days
@@ -144,7 +144,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                         {day.date && (
                           <span
                             className={cn(
-                              "absolute inset-0 flex items-center justify-center text-xs font-medium transition-colors",
+                              "absolute inset-0 flex items-center justify-center text-[10px] sm:text-xs font-medium transition-colors",
                               day.isScheduled && day.isCompleted ? "text-white" : "text-muted-foreground",
                             )}
                           >
@@ -163,18 +163,18 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
       })}
 
       {/* Enhanced Legend */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-muted/20 border-2 border-muted-foreground/10"></div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-4 border-t border-white/10">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-muted/20 border-2 border-muted-foreground/10"></div>
             <span className="text-muted-foreground">Not scheduled</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-muted/40 border-2 border-purple-300/40"></div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-muted/40 border-2 border-purple-300/40"></div>
             <span className="text-muted-foreground">Missed</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-gradient-to-br from-purple-500 to-violet-500 border-2 border-purple-400 shadow-sm shadow-purple-500/20"></div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-gradient-to-br from-purple-500 to-violet-500 border-2 border-purple-400 shadow-sm shadow-purple-500/20"></div>
             <span className="text-muted-foreground">Completed</span>
           </div>
         </div>

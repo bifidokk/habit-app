@@ -1,17 +1,11 @@
 import { refreshTokenIfNeeded, clearAuthData } from '@/lib/auth'
 import type { Habit, HabitInput } from '@/types/habit'
 
-/**
- * Get the backend API URL from environment
- */
 function getBackendUrl(): string {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
   return url.replace(/\/$/, '') // Remove trailing slash
 }
 
-/**
- * Custom error class for API errors
- */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -23,9 +17,6 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Authenticated fetch wrapper that automatically includes JWT token
- */
 export async function authenticatedFetch(
   endpoint: string,
   options: RequestInit = {}
@@ -70,9 +61,6 @@ export async function authenticatedFetch(
   return response
 }
 
-/**
- * Make an authenticated GET request
- */
 export async function apiGet<T>(endpoint: string): Promise<T> {
   const response = await authenticatedFetch(endpoint, {
     method: 'GET'
@@ -81,9 +69,6 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
   return response.json()
 }
 
-/**
- * Make an authenticated POST request
- */
 export async function apiPost<T>(
   endpoint: string,
   data?: any
@@ -96,9 +81,6 @@ export async function apiPost<T>(
   return response.json()
 }
 
-/**
- * Make an authenticated PUT request
- */
 export async function apiPut<T>(
   endpoint: string,
   data?: any
@@ -111,9 +93,6 @@ export async function apiPut<T>(
   return response.json()
 }
 
-/**
- * Make an authenticated DELETE request
- */
 export async function apiDelete<T>(endpoint: string): Promise<T> {
   const response = await authenticatedFetch(endpoint, {
     method: 'DELETE'
@@ -128,39 +107,22 @@ export async function apiDelete<T>(endpoint: string): Promise<T> {
   return {} as T
 }
 
-// Habit-specific API functions
-
-/**
- * Fetch all habits from backend
- */
 export async function fetchHabits(): Promise<Habit[]> {
   return apiGet<Habit[]>('/api/habits')
 }
 
-/**
- * Create a new habit
- */
 export async function createHabit(habitData: HabitInput): Promise<Habit> {
   return apiPost<Habit>('/api/habits', habitData)
 }
 
-/**
- * Update an existing habit
- */
 export async function updateHabit(habitId: string, habitData: HabitInput): Promise<Habit> {
   return apiPut<Habit>(`/api/habits/${habitId}`, habitData)
 }
 
-/**
- * Delete a habit
- */
 export async function deleteHabit(habitId: string): Promise<void> {
   return apiDelete<void>(`/api/habits/${habitId}`)
 }
 
-/**
- * Toggle habit completion for a specific date
- */
 export async function toggleHabitCompletion(
   habitId: string,
   date: string,
@@ -172,11 +134,6 @@ export async function toggleHabitCompletion(
   })
 }
 
-
-
-/**
- * Health check endpoint to verify backend connectivity
- */
 export async function checkBackendHealth(): Promise<boolean> {
   try {
     const response = await fetch(`${getBackendUrl()}/api/health`, {
