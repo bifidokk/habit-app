@@ -21,10 +21,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en">
       <head>
         {/* Telegram WebApp Script - REQUIRED for Mini Apps */}
         <script src="https://telegram.org/js/telegram-web-app.js" />
+        <style>{`
+html {
+  font-family: ${GeistSans.style.fontFamily};
+  --font-sans: ${GeistSans.style.fontFamily};
+  --font-mono: ${GeistMono.variable};
+}
+        `}</style>
       </head>
       <body>{children}</body>
     </html>
