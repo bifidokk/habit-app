@@ -111,7 +111,10 @@ export function TodaySummary({
             <span>Completion Rate</span>
             <span className="font-medium">{todayStats.completionRate}%</span>
           </div>
-          <Progress value={todayStats.completionRate} className="h-2" />
+          <Progress 
+            value={todayStats.completionRate} 
+            className="h-2 [&>div]:bg-purple-500/20 [&>div>div]:bg-purple-500" 
+          />
         </div>
 
         <div className="space-y-2">
