@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import type { Habit } from "@/types/habit"
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-const UI_ORDER = [1, 2, 3, 4, 5, 6, 0] // Mon..Sun
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const UI_ORDER = [0, 1, 2, 3, 4, 5, 6] // Mon..Sun
 
 export function HabitEditForm({
   habit,
