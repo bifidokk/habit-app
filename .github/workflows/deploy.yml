@@ -67,6 +67,10 @@ jobs:
         ls -la deployment/docker-compose.yml || echo "❌ docker-compose.yml not found in deployment!"
         echo "🐳 Checking if Dockerfile was copied:"
         ls -la deployment/Dockerfile || echo "❌ Dockerfile not found in deployment!"
+        echo "📦 Checking if package.json was copied:"
+        ls -la deployment/package.json || echo "❌ package.json not found in deployment!"
+        echo "📦 Checking if yarn.lock was copied:"
+        ls -la deployment/yarn.lock || echo "❌ yarn.lock not found in deployment!"
 
     - name: Deploy to Hetzner VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -151,6 +155,12 @@ jobs:
           echo "✅ File move process completed"
           echo "📋 Final directory contents:"
           ls -la
+          echo "📦 Checking if package.json exists:"
+          ls -la package.json || echo "❌ package.json not found!"
+          echo "📦 Checking if yarn.lock exists:"
+          ls -la yarn.lock || echo "❌ yarn.lock not found!"
+          echo "🐳 Checking if Dockerfile exists:"
+          ls -la Dockerfile || echo "❌ Dockerfile not found!"
 
     - name: Start application with Docker
       uses: appleboy/ssh-action@v1.0.3
