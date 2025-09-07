@@ -80,8 +80,25 @@ jobs:
         username: ${{ secrets.HETZNER_USERNAME }}
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
-        source: "deployment/*"
-        target: "/var/www/habit-app/"
+        source: "deployment/"
+        target: "/var/www/habit-app/temp-upload"
+
+    - name: Move files to correct location
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        script: |
+          cd /var/www/habit-app
+          # Move files from temp-upload to main directory
+          mv temp-upload/* . 2>/dev/null || true
+          mv temp-upload/.* . 2>/dev/null || true
+          # Remove temp directory
+          rm -rf temp-upload
+          # Remove old deployment directory
+          rm -rf deployment
 
     - name: Start application with Docker
       uses: appleboy/ssh-action@v1.0.3
