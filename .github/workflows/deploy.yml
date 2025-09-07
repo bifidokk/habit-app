@@ -34,12 +34,7 @@ jobs:
 
     - name: Create deployment package
       run: |
-        echo "🔍 Creating deployment package..."
         mkdir -p deployment
-        echo "📁 Created deployment directory"
-        echo "📋 Contents of deployment directory:"
-        ls -la deployment/
-        echo "📦 Copying application files..."
         cp -r .next deployment/
         cp -r public deployment/
         cp -r app deployment/
@@ -59,19 +54,6 @@ jobs:
         cp docker-compose.yml deployment/
         cp nginx.conf deployment/
         cp Dockerfile deployment/
-        echo "✅ Deployment package created"
-        echo "📋 Final contents of deployment directory:"
-        ls -la deployment/
-        echo "📁 Contents of deployment/.next directory:"
-        ls -la deployment/.next/ || echo "❌ .next directory not found!"
-        echo "🐳 Checking if docker-compose.yml was copied:"
-        ls -la deployment/docker-compose.yml || echo "❌ docker-compose.yml not found in deployment!"
-        echo "🐳 Checking if Dockerfile was copied:"
-        ls -la deployment/Dockerfile || echo "❌ Dockerfile not found in deployment!"
-        echo "📦 Checking if package.json was copied:"
-        ls -la deployment/package.json || echo "❌ package.json not found in deployment!"
-        echo "📦 Checking if yarn.lock was copied:"
-        ls -la deployment/yarn.lock || echo "❌ yarn.lock not found in deployment!"
 
     - name: Deploy to Hetzner VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -89,10 +71,8 @@ jobs:
           docker compose down || true
           
           # Clean up Docker to free space
-          echo "🧹 Cleaning up Docker to free space..."
           docker system prune -a -f || true
           docker image prune -a -f || true
-          echo "✅ Docker cleanup completed"
 
     - name: Copy files to VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -102,18 +82,9 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
-          echo "🔍 Starting VPS preparation..."
           cd /var/www/habit-app
-          echo "📁 Current directory: $(pwd)"
-          echo "📋 Directory contents:"
-          ls -la
-          echo "🗑️ Removing old deployment directories..."
           rm -rf deployment temp-upload
-          echo "📁 Creating temporary directory for upload..."
           mkdir -p temp-upload
-          echo "✅ VPS preparation completed"
-          echo "📋 Directory contents after preparation:"
-          ls -la
 
     - name: Upload files to VPS
       uses: appleboy/scp-action@v0.1.7
@@ -134,35 +105,10 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
-          echo "🔍 Starting file move process..."
           cd /var/www/habit-app
-          echo "📁 Current directory: $(pwd)"
-          echo "📋 Directory contents before move:"
-          ls -la
-          echo "📁 Contents of temp-upload directory:"
-          ls -la temp-upload/ || echo "❌ temp-upload directory not found!"
-          echo "📁 Contents of temp-upload/deployment directory:"
-          ls -la temp-upload/deployment/ || echo "❌ temp-upload/deployment directory not found!"
-          echo "🔄 Moving files from temp-upload/deployment to main directory..."
-          # Move files from temp-upload/deployment to main directory
-          mv temp-upload/deployment/* . 2>/dev/null || echo "⚠️ No files to move from temp-upload/deployment/*"
-          mv temp-upload/deployment/.* . 2>/dev/null || echo "⚠️ No hidden files to move from temp-upload/deployment/.*"
-          echo "📋 Directory contents after move:"
-          ls -la
-          echo "🗑️ Cleaning up temp directories..."
-          # Remove temp directory
-          rm -rf temp-upload
-          # Remove old deployment directory
-          rm -rf deployment
-          echo "✅ File move process completed"
-          echo "📋 Final directory contents:"
-          ls -la
-          echo "📦 Checking if package.json exists:"
-          ls -la package.json || echo "❌ package.json not found!"
-          echo "📦 Checking if yarn.lock exists:"
-          ls -la yarn.lock || echo "❌ yarn.lock not found!"
-          echo "🐳 Checking if Dockerfile exists:"
-          ls -la Dockerfile || echo "❌ Dockerfile not found!"
+          mv temp-upload/deployment/* . 2>/dev/null || true
+          mv temp-upload/deployment/.* . 2>/dev/null || true
+          rm -rf temp-upload deployment
 
     - name: Start application with Docker
       uses: appleboy/ssh-action@v1.0.3
@@ -172,35 +118,11 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
-          echo "🔍 Starting Docker application..."
           cd /var/www/habit-app
-          echo "📁 Current directory: $(pwd)"
-          echo "📋 Directory contents:"
-          ls -la
-          echo "🐳 Checking if docker-compose.yml exists:"
-          ls -la docker-compose.yml || echo "❌ docker-compose.yml not found!"
-          echo "🐳 Checking Docker build context files:"
-          echo "📦 package.json:"
-          ls -la package.json || echo "❌ package.json not found!"
-          echo "📦 yarn.lock:"
-          ls -la yarn.lock || echo "❌ yarn.lock not found!"
-          echo "📦 Dockerfile:"
-          ls -la Dockerfile || echo "❌ Dockerfile not found!"
-          echo "🐳 Starting application with Docker Compose..."
-          # Enable BuildKit for faster builds
-          export DOCKER_BUILDKIT=1
-          export COMPOSE_DOCKER_CLI_BUILD=1
           docker compose up -d --build
-          echo "⏳ Waiting for application to be ready..."
           sleep 30
-          echo "🏥 Performing health check..."
-          curl -f http://localhost:3000 || echo "❌ Health check failed!"
-          echo "✅ Docker application startup completed"
-          
-          # Final cleanup after successful deployment
-          echo "🧹 Final cleanup after deployment..."
+          curl -f http://localhost:3000 || exit 1
           docker system prune -f || true
-          echo "✅ Final cleanup completed"
 
     - name: Notify deployment status
       if: always()
