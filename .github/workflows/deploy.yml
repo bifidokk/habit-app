@@ -64,7 +64,7 @@ jobs:
           cd /var/www/habit-app
           
           # Stop existing application
-          docker-compose down || true
+          docker compose down || true
           
           # Backup current deployment
           if [ -d ".next" ]; then
@@ -92,7 +92,7 @@ jobs:
           cd /var/www/habit-app
           
           # Start application with Docker Compose
-          docker-compose up -d --build
+          docker compose up -d --build
           
           # Wait for application to be ready
           sleep 30
