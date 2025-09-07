@@ -34,7 +34,12 @@ jobs:
 
     - name: Create deployment package
       run: |
+        echo "🔍 Creating deployment package..."
         mkdir -p deployment
+        echo "📁 Created deployment directory"
+        echo "📋 Contents of deployment directory:"
+        ls -la deployment/
+        echo "📦 Copying application files..."
         cp -r .next deployment/
         cp -r public deployment/
         cp -r components deployment/
@@ -52,6 +57,13 @@ jobs:
         cp components.json deployment/
         cp docker-compose.yml deployment/
         cp nginx.conf deployment/
+        echo "✅ Deployment package created"
+        echo "📋 Final contents of deployment directory:"
+        ls -la deployment/
+        echo "📁 Contents of deployment/.next directory:"
+        ls -la deployment/.next/ || echo "❌ .next directory not found!"
+        echo "🐳 Checking if docker-compose.yml was copied:"
+        ls -la deployment/docker-compose.yml || echo "❌ docker-compose.yml not found in deployment!"
 
     - name: Deploy to Hetzner VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -81,11 +93,18 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
+          echo "🔍 Starting VPS preparation..."
           cd /var/www/habit-app
-          # Remove old deployment directory if it exists
+          echo "📁 Current directory: $(pwd)"
+          echo "📋 Directory contents:"
+          ls -la
+          echo "🗑️ Removing old deployment directories..."
           rm -rf deployment temp-upload
-          # Create temporary directory for upload
+          echo "📁 Creating temporary directory for upload..."
           mkdir -p temp-upload
+          echo "✅ VPS preparation completed"
+          echo "📋 Directory contents after preparation:"
+          ls -la
 
     - name: Upload files to VPS
       uses: appleboy/scp-action@v0.1.7
@@ -96,6 +115,7 @@ jobs:
         port: ${{ secrets.HETZNER_PORT || 22 }}
         source: "deployment/"
         target: "/var/www/habit-app/temp-upload"
+        strip_components: 0
 
     - name: Move files to correct location
       uses: appleboy/ssh-action@v1.0.3
@@ -105,14 +125,29 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
+          echo "🔍 Starting file move process..."
           cd /var/www/habit-app
+          echo "📁 Current directory: $(pwd)"
+          echo "📋 Directory contents before move:"
+          ls -la
+          echo "📁 Contents of temp-upload directory:"
+          ls -la temp-upload/ || echo "❌ temp-upload directory not found!"
+          echo "📁 Contents of temp-upload/deployment directory:"
+          ls -la temp-upload/deployment/ || echo "❌ temp-upload/deployment directory not found!"
+          echo "🔄 Moving files from temp-upload to main directory..."
           # Move files from temp-upload to main directory
-          mv temp-upload/* . 2>/dev/null || true
-          mv temp-upload/.* . 2>/dev/null || true
+          mv temp-upload/* . 2>/dev/null || echo "⚠️ No files to move from temp-upload/*"
+          mv temp-upload/.* . 2>/dev/null || echo "⚠️ No hidden files to move from temp-upload/.*"
+          echo "📋 Directory contents after move:"
+          ls -la
+          echo "🗑️ Cleaning up temp directories..."
           # Remove temp directory
           rm -rf temp-upload
           # Remove old deployment directory
           rm -rf deployment
+          echo "✅ File move process completed"
+          echo "📋 Final directory contents:"
+          ls -la
 
     - name: Start application with Docker
       uses: appleboy/ssh-action@v1.0.3
@@ -122,19 +157,22 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         script: |
+          echo "🔍 Starting Docker application..."
           cd /var/www/habit-app
-          
-          # Start application with Docker Compose
+          echo "📁 Current directory: $(pwd)"
+          echo "📋 Directory contents:"
+          ls -la
+          echo "🐳 Checking if docker-compose.yml exists:"
+          ls -la docker-compose.yml || echo "❌ docker-compose.yml not found!"
+          echo "🐳 Starting application with Docker Compose..."
           docker compose up -d --build
-          
-          # Wait for application to be ready
+          echo "⏳ Waiting for application to be ready..."
           sleep 30
-          
-          # Health check
-          curl -f http://localhost:3000 || exit 1
-          
-          # Cleanup old backups (keep last 5)
-          ls -t backup-* | tail -n +6 | xargs rm -rf || true
+          echo "🏥 Performing health check..."
+          curl -f http://localhost:3000 || echo "❌ Health check failed!"
+          echo "🧹 Cleaning up old backups (keep last 5)..."
+          ls -t backup-* | tail -n +6 | xargs rm -rf || echo "⚠️ No old backups to clean up"
+          echo "✅ Docker application startup completed"
 
     - name: Notify deployment status
       if: always()
