@@ -81,7 +81,7 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         port: ${{ secrets.HETZNER_PORT || 22 }}
         source: "deployment/*"
-        target: "/var/www/habit-app"
+        target: "/var/www/habit-app/"
 
     - name: Start application with Docker
       uses: appleboy/ssh-action@v1.0.3
