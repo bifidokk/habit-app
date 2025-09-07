@@ -86,11 +86,6 @@ jobs:
           
           # Stop existing application
           docker compose down || true
-          
-          # Backup current deployment
-          if [ -d ".next" ]; then
-            mv .next backup-$(date +%Y%m%d-%H%M%S) || true
-          fi
 
     - name: Copy files to VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -177,14 +172,19 @@ jobs:
           ls -la
           echo "🐳 Checking if docker-compose.yml exists:"
           ls -la docker-compose.yml || echo "❌ docker-compose.yml not found!"
+          echo "🐳 Checking Docker build context files:"
+          echo "📦 package.json:"
+          ls -la package.json || echo "❌ package.json not found!"
+          echo "📦 yarn.lock:"
+          ls -la yarn.lock || echo "❌ yarn.lock not found!"
+          echo "📦 Dockerfile:"
+          ls -la Dockerfile || echo "❌ Dockerfile not found!"
           echo "🐳 Starting application with Docker Compose..."
           docker compose up -d --build
           echo "⏳ Waiting for application to be ready..."
           sleep 30
           echo "🏥 Performing health check..."
           curl -f http://localhost:3000 || echo "❌ Health check failed!"
-          echo "🧹 Cleaning up old backups (keep last 5)..."
-          ls -t backup-* | tail -n +6 | xargs rm -rf || echo "⚠️ No old backups to clean up"
           echo "✅ Docker application startup completed"
 
     - name: Notify deployment status
