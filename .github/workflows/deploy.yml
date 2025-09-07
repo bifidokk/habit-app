@@ -121,7 +121,7 @@ jobs:
           cd /var/www/habit-app
           docker compose up -d --build
           sleep 30
-          curl -f http://localhost:3000 || exit 1
+          curl -f http://localhost:3000/telegram-app || exit 1
           docker system prune -f || true
 
     - name: Notify deployment status
