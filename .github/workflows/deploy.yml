@@ -57,6 +57,7 @@ jobs:
         cp components.json deployment/
         cp docker-compose.yml deployment/
         cp nginx.conf deployment/
+        cp Dockerfile deployment/
         echo "✅ Deployment package created"
         echo "📋 Final contents of deployment directory:"
         ls -la deployment/
@@ -64,6 +65,8 @@ jobs:
         ls -la deployment/.next/ || echo "❌ .next directory not found!"
         echo "🐳 Checking if docker-compose.yml was copied:"
         ls -la deployment/docker-compose.yml || echo "❌ docker-compose.yml not found in deployment!"
+        echo "🐳 Checking if Dockerfile was copied:"
+        ls -la deployment/Dockerfile || echo "❌ Dockerfile not found in deployment!"
 
     - name: Deploy to Hetzner VPS
       uses: appleboy/ssh-action@v1.0.3
