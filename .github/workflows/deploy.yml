@@ -74,6 +74,20 @@ jobs:
           fi
 
     - name: Copy files to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        script: |
+          cd /var/www/habit-app
+          # Remove old deployment directory if it exists
+          rm -rf deployment temp-upload
+          # Create temporary directory for upload
+          mkdir -p temp-upload
+
+    - name: Upload files to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.HETZNER_HOST }}
