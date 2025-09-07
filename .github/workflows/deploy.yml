@@ -187,6 +187,9 @@ jobs:
           echo "📦 Dockerfile:"
           ls -la Dockerfile || echo "❌ Dockerfile not found!"
           echo "🐳 Starting application with Docker Compose..."
+          # Enable BuildKit for faster builds
+          export DOCKER_BUILDKIT=1
+          export COMPOSE_DOCKER_CLI_BUILD=1
           docker compose up -d --build
           echo "⏳ Waiting for application to be ready..."
           sleep 30
