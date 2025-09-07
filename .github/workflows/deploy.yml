@@ -50,6 +50,8 @@ jobs:
         cp postcss.config.mjs deployment/
         cp tailwind.config.js deployment/ 2>/dev/null || true
         cp components.json deployment/
+        cp docker-compose.yml deployment/
+        cp nginx.conf deployment/
 
     - name: Deploy to Hetzner VPS
       uses: appleboy/ssh-action@v1.0.3
