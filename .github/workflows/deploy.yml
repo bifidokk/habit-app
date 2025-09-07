@@ -134,10 +134,10 @@ jobs:
           ls -la temp-upload/ || echo "❌ temp-upload directory not found!"
           echo "📁 Contents of temp-upload/deployment directory:"
           ls -la temp-upload/deployment/ || echo "❌ temp-upload/deployment directory not found!"
-          echo "🔄 Moving files from temp-upload to main directory..."
-          # Move files from temp-upload to main directory
-          mv temp-upload/* . 2>/dev/null || echo "⚠️ No files to move from temp-upload/*"
-          mv temp-upload/.* . 2>/dev/null || echo "⚠️ No hidden files to move from temp-upload/.*"
+          echo "🔄 Moving files from temp-upload/deployment to main directory..."
+          # Move files from temp-upload/deployment to main directory
+          mv temp-upload/deployment/* . 2>/dev/null || echo "⚠️ No files to move from temp-upload/deployment/*"
+          mv temp-upload/deployment/.* . 2>/dev/null || echo "⚠️ No hidden files to move from temp-upload/deployment/.*"
           echo "📋 Directory contents after move:"
           ls -la
           echo "🗑️ Cleaning up temp directories..."
