@@ -23,19 +23,6 @@ services:
     networks:
       - habit-app-network
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - habit-app
-    restart: unless-stopped
-    networks:
-      - habit-app-network
 
 networks:
   habit-app-network:

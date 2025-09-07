@@ -87,6 +87,12 @@ jobs:
           
           # Stop existing application
           docker compose down || true
+          
+          # Clean up Docker to free space
+          echo "🧹 Cleaning up Docker to free space..."
+          docker system prune -a -f || true
+          docker image prune -a -f || true
+          echo "✅ Docker cleanup completed"
 
     - name: Copy files to VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -187,6 +193,11 @@ jobs:
           echo "🏥 Performing health check..."
           curl -f http://localhost:3000 || echo "❌ Health check failed!"
           echo "✅ Docker application startup completed"
+          
+          # Final cleanup after successful deployment
+          echo "🧹 Final cleanup after deployment..."
+          docker system prune -f || true
+          echo "✅ Final cleanup completed"
 
     - name: Notify deployment status
       if: always()
