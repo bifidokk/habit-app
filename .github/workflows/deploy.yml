@@ -1,0 +1,119 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Run linting
+      run: yarn lint
+
+    - name: Build application
+      run: yarn build
+      env:
+        NODE_ENV: production
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deployment
+        cp -r .next deployment/
+        cp -r public deployment/
+        cp -r components deployment/
+        cp -r contexts deployment/
+        cp -r hooks deployment/
+        cp -r lib deployment/
+        cp -r types deployment/
+        cp -r styles deployment/
+        cp package.json deployment/
+        cp yarn.lock deployment/
+        cp next.config.mjs deployment/
+        cp tsconfig.json deployment/
+        cp postcss.config.mjs deployment/
+        cp tailwind.config.js deployment/ 2>/dev/null || true
+        cp components.json deployment/
+
+    - name: Deploy to Hetzner VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        script: |
+          # Create app directory if it doesn't exist
+          mkdir -p /var/www/habit-app
+          cd /var/www/habit-app
+          
+          # Stop existing application
+          docker-compose down || true
+          
+          # Backup current deployment
+          if [ -d ".next" ]; then
+            mv .next backup-$(date +%Y%m%d-%H%M%S) || true
+          fi
+
+    - name: Copy files to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        source: "deployment/*"
+        target: "/var/www/habit-app"
+
+    - name: Start application with Docker
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        script: |
+          cd /var/www/habit-app
+          
+          # Start application with Docker Compose
+          docker-compose up -d --build
+          
+          # Wait for application to be ready
+          sleep 30
+          
+          # Health check
+          curl -f http://localhost:3000 || exit 1
+          
+          # Cleanup old backups (keep last 5)
+          ls -t backup-* | tail -n +6 | xargs rm -rf || true
+
+    - name: Notify deployment status
+      if: always()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        port: ${{ secrets.HETZNER_PORT || 22 }}
+        script: |
+          echo "Deployment ${{ job.status }} at $(date)"
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Application deployed successfully"
+          else
+            echo "❌ Deployment failed"
+          fi
