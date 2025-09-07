@@ -42,6 +42,7 @@ jobs:
         echo "📦 Copying application files..."
         cp -r .next deployment/
         cp -r public deployment/
+        cp -r app deployment/
         cp -r components deployment/
         cp -r contexts deployment/
         cp -r hooks deployment/
