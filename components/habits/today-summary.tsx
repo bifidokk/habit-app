@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { isHabitActiveToday, isHabitCompletedToday, completeHabit, getTodayDateString } from "@/lib/storage"
 import type { Habit } from "@/types/habit"
@@ -22,11 +21,11 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export function TodaySummary({ 
-  habits, 
-  onUpdate 
+  habits,
+  onHabitCompleted 
 }: { 
   habits: Habit[]
-  onUpdate?: (updatedHabit: Habit) => void
+  onHabitCompleted?: () => void
 }) {
   const [expandedNames, setExpandedNames] = useState<Set<string>>(new Set())
   const isLongName = (name: string) => name.length > 50
@@ -46,11 +45,11 @@ export function TodaySummary({
   const handleCompleteHabit = async (habitId: string) => {
     try {
       const today = getTodayDateString()
-      const updatedHabit = await completeHabit(habitId, today)
+      await completeHabit(habitId, today)
       
-      // Notify parent component with the updated habit
-      if (onUpdate) {
-        onUpdate(updatedHabit)
+      // Notify parent component that habit was completed (just refresh the list)
+      if (onHabitCompleted) {
+        onHabitCompleted()
       }
     } catch (error) {
       console.error('Failed to complete habit:', error)

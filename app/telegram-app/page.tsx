@@ -103,6 +103,17 @@ function TelegramHabitAppContent() {
     }
   }
 
+  const onHabitCompleted = async () => {
+    try {
+      setError(null)
+      // Just refresh the habits list after completion
+      const updatedHabits = await getHabits()
+      setHabits(updatedHabits)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh habits')
+    }
+  }
+
   const userDisplayName = useMemo(() => {
     // Prefer authenticated user data over Telegram user data
     const user = authUser || tgUser
@@ -209,7 +220,7 @@ function TelegramHabitAppContent() {
             </Card>
           )}
 
-          {!isLoading && <TodaySummary habits={habits} onUpdate={onUpdate} />}
+          {!isLoading && <TodaySummary habits={habits} onUpdate={onUpdate} onHabitCompleted={onHabitCompleted} />}
 
           <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
             <CardHeader className="pb-3">
@@ -223,7 +234,7 @@ function TelegramHabitAppContent() {
                 </div>
               ) : (
                 <>
-                  <HabitList habits={habits} onDelete={onDelete} onUpdate={onUpdate} />
+                  <HabitList habits={habits} onDelete={onDelete} onUpdate={onUpdate} onHabitCompleted={onHabitCompleted} />
                   {habits.length === 0 && (
                     <div className="text-sm text-muted-foreground py-4">No habits yet. Add your first habit above.</div>
                   )}

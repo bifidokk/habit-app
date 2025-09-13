@@ -35,10 +35,12 @@ export function HabitList({
   habits = [],
   onDelete = () => {},
   onUpdate = () => {},
+  onHabitCompleted = () => {},
 }: {
   habits?: Habit[]
   onDelete?: (id: string) => void
   onUpdate?: (habit: Habit) => void
+  onHabitCompleted?: () => void
 }) {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null)
@@ -63,8 +65,8 @@ export function HabitList({
   const handleCompleteHabit = async (habitId: string) => {
     try {
       const today = getTodayDateString()
-      const updatedHabit = await completeHabit(habitId, today)
-      onUpdate(updatedHabit)
+      await completeHabit(habitId, today)
+      onHabitCompleted()
     } catch (error) {
       console.error('Failed to complete habit:', error)
     }

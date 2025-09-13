@@ -1,0 +1,282 @@
+# Cursor Rules for Habit App
+
+## Project Overview
+This is a Next.js 15 habit tracking application with Telegram WebApp integration, built with TypeScript, Tailwind CSS, and shadcn/ui components.
+
+## Tech Stack
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Package Manager**: Yarn
+- **Deployment**: Docker + GitHub Actions + Hetzner VPS
+- **Integration**: Telegram WebApp
+
+## Code Style & Conventions
+
+### TypeScript
+- Use strict TypeScript with proper type definitions
+- Prefer interfaces over types for object shapes
+- Use `const` assertions for immutable data
+- Avoid `any` type, use `unknown` or proper typing
+- Use proper return types for functions
+
+### React/Next.js
+- Use functional components with hooks
+- Prefer `const` over `let` for variables
+- Use proper dependency arrays in useEffect
+- Implement proper error boundaries
+- Use Next.js App Router patterns
+- Prefer server components when possible
+
+### File Naming
+- Use kebab-case for file names: `habit-list.tsx`
+- Use PascalCase for component names: `HabitList`
+- Use camelCase for utility functions: `formatDate`
+- Use UPPER_CASE for constants: `MAX_HABITS`
+
+### Component Structure
+```typescript
+// Component file structure
+import React from 'react'
+import { ComponentProps } from './types'
+
+interface Props {
+  // Props interface
+}
+
+export const ComponentName: React.FC<Props> = ({ prop1, prop2 }) => {
+  // Component logic
+  return (
+    <div>
+      {/* JSX */}
+    </div>
+  )
+}
+```
+
+## Project Structure
+
+### Directories
+- `app/` - Next.js App Router pages and layouts
+- `components/` - Reusable React components
+  - `ui/` - shadcn/ui components
+  - `habits/` - Habit-specific components
+  - `fx/` - Visual effects components
+- `lib/` - Utility functions and configurations
+- `types/` - TypeScript type definitions
+- `hooks/` - Custom React hooks
+- `contexts/` - React context providers
+- `styles/` - Global styles and CSS
+
+### Key Files
+- `package.json` - Dependencies and scripts
+- `next.config.mjs` - Next.js configuration
+- `tailwind.config.js` - Tailwind CSS configuration
+- `tsconfig.json` - TypeScript configuration
+- `components.json` - shadcn/ui configuration
+- `Dockerfile` - Docker container configuration
+- `docker-compose.yml` - Docker services configuration
+
+## Coding Guidelines
+
+### Components
+- Keep components small and focused
+- Use proper prop validation
+- Implement proper error handling
+- Use TypeScript interfaces for props
+- Follow single responsibility principle
+
+### State Management
+- Use React hooks for local state
+- Use context for global state
+- Implement proper state updates
+- Avoid prop drilling
+
+### Styling
+- Use Tailwind CSS classes
+- Follow mobile-first responsive design
+- Use CSS variables for theming
+- Implement dark mode support
+- Use shadcn/ui components when possible
+
+### API & Data
+- Use proper TypeScript types for API responses
+- Implement error handling for API calls
+- Use proper loading states
+- Implement data validation
+
+## Telegram WebApp Integration
+
+### Key Files
+- `lib/telegram.ts` - Telegram WebApp utilities
+- `lib/telegram-theme.ts` - Theme integration
+- `types/telegram-webapp.d.ts` - TypeScript definitions
+- `app/telegram-app/page.tsx` - Main Telegram page
+
+### Guidelines
+- Use Telegram WebApp API for user data
+- Implement proper theme detection
+- Handle Telegram-specific features
+- Ensure mobile-first design
+
+## Deployment & DevOps
+
+### Docker
+- Use multi-stage builds for optimization
+- Implement proper caching
+- Use Alpine Linux for smaller images
+- Set proper environment variables
+
+### GitHub Actions
+- Use proper secrets management
+- Implement proper error handling
+- Use Docker for consistent builds
+- Implement proper cleanup
+
+### VPS Deployment
+- Use `/var/www/habit-app` as deployment directory
+- Implement proper file permissions
+- Use Docker Compose for service management
+- Implement proper health checks
+
+## Performance & Optimization
+
+### Next.js
+- Use proper image optimization
+- Implement proper caching strategies
+- Use dynamic imports for code splitting
+- Optimize bundle size
+
+### Docker
+- Use build cache mounts
+- Implement proper layer caching
+- Use multi-stage builds
+- Optimize image size
+
+## Testing & Quality
+
+### Code Quality
+- Use ESLint for code linting
+- Use Prettier for code formatting
+- Implement proper error handling
+- Use TypeScript strict mode
+
+### Performance
+- Monitor bundle size
+- Implement proper caching
+- Use performance monitoring
+- Optimize images and assets
+
+## Security
+
+### Environment Variables
+- Use proper secret management
+- Never commit secrets to repository
+- Use environment-specific configurations
+- Implement proper validation
+
+### API Security
+- Implement proper authentication
+- Use HTTPS for all communications
+- Implement proper CORS policies
+- Validate all inputs
+
+## Documentation
+
+### Code Documentation
+- Use JSDoc for complex functions
+- Document component props
+- Explain complex business logic
+- Keep README updated
+
+### API Documentation
+- Document API endpoints
+- Explain data structures
+- Provide usage examples
+- Keep documentation current
+
+## Common Patterns
+
+### Error Handling
+```typescript
+try {
+  // Operation
+} catch (error) {
+  console.error('Error:', error)
+  // Handle error
+}
+```
+
+### Loading States
+```typescript
+const [loading, setLoading] = useState(false)
+const [error, setError] = useState<string | null>(null)
+```
+
+### TypeScript Interfaces
+```typescript
+interface Habit {
+  id: string
+  name: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+## Best Practices
+
+1. **Always use TypeScript** - No JavaScript files
+2. **Follow React patterns** - Use hooks and functional components
+3. **Implement proper error handling** - Don't let errors crash the app
+4. **Use proper state management** - Avoid prop drilling
+5. **Implement responsive design** - Mobile-first approach
+6. **Use proper naming conventions** - Be consistent
+7. **Write clean, readable code** - Others should understand it
+8. **Implement proper testing** - Test critical functionality
+9. **Follow security best practices** - Protect user data
+10. **Optimize for performance** - Fast loading and smooth UX
+
+## Tools & Extensions
+
+### Recommended VS Code Extensions
+- TypeScript and JavaScript Language Features
+- Tailwind CSS IntelliSense
+- ES7+ React/Redux/React-Native snippets
+- Prettier - Code formatter
+- ESLint
+- Auto Rename Tag
+- Bracket Pair Colorizer
+- GitLens
+
+### Development Tools
+- Yarn for package management
+- Docker for containerization
+- GitHub Actions for CI/CD
+- Hetzner VPS for deployment
+
+## Getting Started
+
+1. Install dependencies: `yarn install`
+2. Start development server: `yarn dev`
+3. Build for production: `yarn build`
+4. Run Docker locally: `docker compose up`
+5. Deploy to VPS: Push to main branch
+
+## Troubleshooting
+
+### Common Issues
+- TypeScript errors: Check type definitions
+- Build failures: Check dependencies
+- Docker issues: Check Dockerfile and compose file
+- Deployment issues: Check GitHub Actions logs
+
+### Debugging
+- Use browser dev tools
+- Check console logs
+- Use React DevTools
+- Check Docker logs
+- Check GitHub Actions logs
+
+Remember: This is a habit tracking app with Telegram integration. Focus on user experience, mobile-first design, and reliable functionality. Keep the code clean, well-typed, and maintainable.
