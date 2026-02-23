@@ -31,7 +31,7 @@ const USER_KEY = 'habit_app_user'
  * Get the backend API URL from environment
  */
 function getBackendUrl(): string {
-  const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
   return url.replace(/\/$/, '') // Remove trailing slash
 }
 

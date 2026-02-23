@@ -1,141 +1,147 @@
-name: Deploy
+name: Deploy to Hetzner
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'yarn'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
 
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-    #- name: Run linting
-    #  run: yarn lint
+      - name: Run type check
+        run: yarn type-check
 
-    - name: Build application
-      run: yarn build
-      env:
-        NODE_ENV: production
+      - name: Run linting
+        run: yarn lint
 
-    - name: Create deployment package
-      run: |
-        mkdir -p deployment
-        cp -r .next deployment/
-        cp -r public deployment/
-        cp -r app deployment/
-        cp -r components deployment/
-        cp -r contexts deployment/
-        cp -r hooks deployment/
-        cp -r lib deployment/
-        cp -r types deployment/
-        cp -r styles deployment/
-        cp package.json deployment/
-        cp yarn.lock deployment/
-        cp next.config.mjs deployment/
-        cp tsconfig.json deployment/
-        cp postcss.config.mjs deployment/
-        cp tailwind.config.js deployment/ 2>/dev/null || true
-        cp components.json deployment/
-        cp docker-compose.yml deployment/
-        cp nginx.conf deployment/
-        cp Dockerfile deployment/
+      - name: Build application
+        run: yarn build
+        env:
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
 
-    - name: Deploy to Hetzner VPS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        script: |
-          # Create app directory if it doesn't exist
-          mkdir -p /var/www/habit-app
-          cd /var/www/habit-app
-          
-          # Stop existing application
-          docker compose down || true
-          
-          # Clean up Docker to free space
-          docker system prune -a -f || true
-          docker image prune -a -f || true
+      - name: Create deployment archive
+        run: |
+          cd dist
+          tar -czf ../deploy.tar.gz .
+          cd ..
 
-    - name: Copy files to VPS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        script: |
-          cd /var/www/habit-app
-          rm -rf deployment temp-upload
-          mkdir -p temp-upload
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USERNAME }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_PORT || 22 }}
+          source: "deploy.tar.gz"
+          target: "/tmp/"
 
-    - name: Upload files to VPS
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        source: "deployment/"
-        target: "/var/www/habit-app/temp-upload"
-        strip_components: 0
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USERNAME }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_PORT || 22 }}
+          script: |
+            set -e
 
-    - name: Move files to correct location
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        script: |
-          cd /var/www/habit-app
-          mv temp-upload/deployment/* . 2>/dev/null || true
-          mv temp-upload/deployment/.* . 2>/dev/null || true
-          rm -rf temp-upload deployment
+            DEPLOY_PATH="/var/www/habit-app"
 
-    - name: Start application with Docker
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        script: |
-          cd /var/www/habit-app
-          docker compose up -d --build
-          sleep 30
-          curl -f http://localhost:3000/telegram-app || exit 1
-          docker system prune -f || true
+            # Check if deploy.tar.gz exists
+            if [ ! -f "/tmp/deploy.tar.gz" ]; then
+              echo "Error: /tmp/deploy.tar.gz not found!"
+              exit 1
+            fi
 
-    - name: Notify deployment status
-      if: always()
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HETZNER_HOST }}
-        username: ${{ secrets.HETZNER_USERNAME }}
-        key: ${{ secrets.HETZNER_SSH_KEY }}
-        port: ${{ secrets.HETZNER_PORT || 22 }}
-        script: |
-          echo "Deployment ${{ job.status }} at $(date)"
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ Application deployed successfully"
-          else
-            echo "❌ Deployment failed"
-          fi
+            echo "Found deployment archive: $(ls -lh /tmp/deploy.tar.gz)"
+
+            # Create backup of current deployment
+            if [ -d "$DEPLOY_PATH" ] && [ "$(ls -A $DEPLOY_PATH)" ]; then
+              echo "Creating backup..."
+              cp -r $DEPLOY_PATH ${DEPLOY_PATH}.backup.$(date +%Y%m%d_%H%M%S)
+              # Keep only last 5 backups
+              ls -dt ${DEPLOY_PATH}.backup.* 2>/dev/null | tail -n +6 | xargs -r rm -rf
+              echo "Backup created"
+            fi
+
+            # Ensure deployment directory exists
+            if [ ! -d "$DEPLOY_PATH" ]; then
+              echo "Directory $DEPLOY_PATH does not exist"
+              echo "Please run on server: sudo mkdir -p $DEPLOY_PATH && sudo chown $USER:$USER $DEPLOY_PATH"
+              exit 1
+            fi
+
+            # Check if we have write permissions
+            if [ ! -w "$DEPLOY_PATH" ]; then
+              echo "No write permission to $DEPLOY_PATH"
+              echo "Please run on server: sudo chown -R $USER:$USER $DEPLOY_PATH"
+              exit 1
+            fi
+
+            # Clear old files
+            echo "Clearing old files..."
+            rm -rf ${DEPLOY_PATH}/*
+
+            # Extract new files
+            echo "Extracting files to $DEPLOY_PATH..."
+            cd $DEPLOY_PATH
+            tar -xzf /tmp/deploy.tar.gz
+
+            # Verify extraction
+            echo "Deployed files:"
+            ls -la $DEPLOY_PATH
+
+            # Cleanup
+            rm /tmp/deploy.tar.gz
+
+            echo "Deployment completed successfully!"
+            echo "Files deployed to: $DEPLOY_PATH"
+
+      - name: Set permissions and reload Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        continue-on-error: true
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USERNAME }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_PORT || 22 }}
+          script: |
+            DEPLOY_PATH="/var/www/habit-app"
+
+            echo "Setting permissions..."
+            sudo chown -R www-data:www-data $DEPLOY_PATH || echo "Could not set www-data ownership"
+            sudo chmod -R 755 $DEPLOY_PATH || echo "Could not set permissions"
+
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx || echo "Could not reload nginx"
+
+      - name: Cleanup local files
+        if: always()
+        run: rm -f deploy.tar.gz
+
+      - name: Deployment summary
+        run: |
+          echo "Deployment to ${{ inputs.environment }} completed!"
+          echo "Deployed to: /var/www/habit-app"
+          echo "Server: ${{ secrets.HETZNER_HOST }}"

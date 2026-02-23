@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useMemo, useState } from "react"
 import { Plus, Loader2, AlertCircle, X } from "lucide-react"
 
@@ -16,15 +14,15 @@ import { getHabits, addHabit, removeHabit, updateHabit } from "@/lib/storage"
 import { getTelegramWebApp, getTelegramUser } from "@/lib/telegram"
 import { useTelegramTheme } from "@/lib/telegram-theme"
 import { BackgroundFX } from "@/components/fx/background"
-import { AuthProvider, useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/contexts/auth-context"
 import type { Habit, HabitInput } from "@/types/habit"
 
-function TelegramHabitAppContent() {
+export default function TelegramHabitAppContent() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
-  
+
   const { isAuthenticated, user: authUser, isLoading: authLoading, backendHealthy } = useAuth()
   const tg = getTelegramWebApp()
   const tgUser = getTelegramUser()
@@ -47,10 +45,10 @@ function TelegramHabitAppContent() {
   useEffect(() => {
     const loadHabits = async () => {
       if (authLoading) return
-      
+
       setIsLoading(true)
       setError(null)
-      
+
       try {
         const loadedHabits = await getHabits()
         setHabits(loadedHabits)
@@ -60,16 +58,16 @@ function TelegramHabitAppContent() {
         setIsLoading(false)
       }
     }
-    
+
     loadHabits()
   }, [isAuthenticated, authLoading])
-  
+
 
   const onAdd = async (input: HabitInput) => {
     try {
       setError(null)
       await addHabit(input)
-      
+
       // Reload habits to get the latest state
       const updatedHabits = await getHabits()
       setHabits(updatedHabits)
@@ -82,7 +80,7 @@ function TelegramHabitAppContent() {
     try {
       setError(null)
       await removeHabit(id)
-      
+
       // Reload habits to get the latest state
       const updatedHabits = await getHabits()
       setHabits(updatedHabits)
@@ -188,14 +186,14 @@ function TelegramHabitAppContent() {
               </AlertDescription>
             </Alert>
           )}
-          
+
           {error && (
             <Alert className="border-red-500/20 bg-red-500/10">
               <AlertCircle className="h-4 w-4 text-red-500" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           {showAddForm && (
             <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
                           <CardHeader className="pb-3">
@@ -220,7 +218,7 @@ function TelegramHabitAppContent() {
             </Card>
           )}
 
-          {!isLoading && <TodaySummary habits={habits} onUpdate={onUpdate} onHabitCompleted={onHabitCompleted} />}
+          {!isLoading && <TodaySummary habits={habits} onHabitCompleted={onHabitCompleted} />}
 
           <Card className="rounded-2xl border-white/15 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
             <CardHeader className="pb-3">
@@ -251,17 +249,17 @@ function TelegramHabitAppContent() {
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
               <p>
-                {isAuthenticated 
+                {isAuthenticated
                   ? `Authenticated as ${userDisplayName}. Data is synced with the backend.`
                   : "Not authenticated. Please authenticate to use the app."
                 }
               </p>
-              <div>Environment: {typeof window !== 'undefined' ? '🌐 Browser' : '🖥️ Server'} • 
+              <div>Environment: 🌐 Browser •
                 Mobile: {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? '📱 Yes' : '💻 No'}
               </div>
               <div>Mobile Mode: {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Active (expandable names)' : 'Inactive (tooltips)'}</div>
               <p className="text-xs">
-                {tg 
+                {tg
                   ? `Telegram WebApp • ${isAuthenticated ? "Backend Connected" : "Authentication Required"}`
                   : "Browser Preview • Authentication Required"
                 }
@@ -276,13 +274,5 @@ function TelegramHabitAppContent() {
         </div>
       </div>
     </main>
-  )
-}
-
-export default function TelegramHabitAppPage() {
-  return (
-    <AuthProvider>
-      <TelegramHabitAppContent />
-    </AuthProvider>
   )
 }

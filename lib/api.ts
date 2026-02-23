@@ -2,7 +2,7 @@ import { refreshTokenIfNeeded, clearAuthData } from '@/lib/auth'
 import type { Habit, HabitInput } from '@/types/habit'
 
 function getBackendUrl(): string {
-  const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
   return url.replace(/\/$/, '') // Remove trailing slash
 }
 
