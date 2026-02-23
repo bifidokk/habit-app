@@ -1,7 +1,7 @@
 import type { Habit, HabitInput } from "@/types/habit"
-import { 
-  fetchHabits, 
-  createHabit as apiCreateHabit, 
+import {
+  fetchHabits,
+  createHabit as apiCreateHabit,
   updateHabit as apiUpdateHabit,
   deleteHabit as apiDeleteHabit,
   toggleHabitCompletion as apiToggleHabitCompletion
@@ -9,56 +9,35 @@ import {
 import { jsDayToBackendDay } from "@/lib/utils"
 
 export async function getHabits(): Promise<Habit[]> {
-  try {
-    return await fetchHabits()
-  } catch (error) {
-    throw error
-  }
+  return await fetchHabits()
 }
 
 export async function addHabit(input: HabitInput): Promise<Habit> {
-  try {
-    return await apiCreateHabit(input)
-  } catch (error) {
-    throw error
-  }
+  return await apiCreateHabit(input)
 }
 
 export async function updateHabit(habit: Habit): Promise<Habit> {
-  try {
-    const habitInput: HabitInput = {
-      name: habit.name,
-      days: habit.days,
-      time: habit.time
-    }
-    return await apiUpdateHabit(habit.id, habitInput)
-  } catch (error) {
-    throw error
+  const habitInput: HabitInput = {
+    name: habit.name,
+    days: habit.days,
+    time: habit.time
   }
+  return await apiUpdateHabit(habit.id, habitInput)
 }
 
 export async function removeHabit(habitId: string): Promise<void> {
-  try {
-    await apiDeleteHabit(habitId)
-  } catch (error) {
-    throw error
-  }
+  await apiDeleteHabit(habitId)
 }
 
 export async function completeHabit(habitId: string, date: string): Promise<Habit> {
-  try {
-    // Mark habit as completed for the given date
-    return await apiToggleHabitCompletion(habitId, date, true)
-  } catch (error) {
-    throw error
-  }
+  return await apiToggleHabitCompletion(habitId, date, true)
 }
 
 export async function getHabitById(habitId: string): Promise<Habit | null> {
   try {
     const habits = await getHabits()
     return habits.find(h => h.id === habitId) || null
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -78,10 +57,3 @@ export function isHabitActiveToday(habit: Habit): boolean {
   const backendToday = jsDayToBackendDay(jsToday) // Convert to backend day system
   return habit.days.includes(backendToday)
 }
-
-
-
-
-
-
-
