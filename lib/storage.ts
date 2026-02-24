@@ -7,13 +7,19 @@ import {
   toggleHabitCompletion as apiToggleHabitCompletion
 } from "@/lib/api"
 import { jsDayToBackendDay } from "@/lib/utils"
+import { DEFAULT_HABIT_COLOR } from "@/lib/habit-colors"
+
+function normalizeHabit(habit: Habit): Habit {
+  return { ...habit, color: habit.color || DEFAULT_HABIT_COLOR }
+}
 
 export async function getHabits(): Promise<Habit[]> {
-  return await fetchHabits()
+  const habits = await fetchHabits()
+  return habits.map(normalizeHabit)
 }
 
 export async function addHabit(input: HabitInput): Promise<Habit> {
-  return await apiCreateHabit(input)
+  return normalizeHabit(await apiCreateHabit(input))
 }
 
 export async function updateHabit(habit: Habit): Promise<Habit> {
@@ -23,7 +29,7 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
     time: habit.time,
     color: habit.color,
   }
-  return await apiUpdateHabit(habit.id, habitInput)
+  return normalizeHabit(await apiUpdateHabit(habit.id, habitInput))
 }
 
 export async function removeHabit(habitId: string): Promise<void> {
@@ -31,7 +37,7 @@ export async function removeHabit(habitId: string): Promise<void> {
 }
 
 export async function completeHabit(habitId: string, date: string): Promise<Habit> {
-  return await apiToggleHabitCompletion(habitId, date, true)
+  return normalizeHabit(await apiToggleHabitCompletion(habitId, date, true))
 }
 
 export async function getHabitById(habitId: string): Promise<Habit | null> {
