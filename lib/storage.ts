@@ -20,7 +20,8 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
   const habitInput: HabitInput = {
     name: habit.name,
     days: habit.days,
-    time: habit.time
+    time: habit.time,
+    color: habit.color,
   }
   return await apiUpdateHabit(habit.id, habitInput)
 }

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { cn, jsDayToBackendDay } from "@/lib/utils"
+import { habitColorWithOpacity } from "@/lib/habit-colors"
 import type { Habit } from "@/types/habit"
 
 interface HeatmapDay {
@@ -21,7 +22,9 @@ function formatDateLocal(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
-export function HabitHeatmap({ habit }: { habit: Habit }) {
+export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string }) {
+  const heatmapColor = color || habit.color || '#8b5cf6'
+
   const heatmapData = useMemo(() => {
     const today = new Date()
     const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1)
@@ -73,7 +76,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
         const weeks: HeatmapDay[][] = []
         const firstDayOfWeek = monthDays.length > 0 ? new Date(monthDays[0].date).getDay() : 0
         const daysToPad = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1
-        
+
         // Add empty cells for days before the first day of the month
         const firstWeek: HeatmapDay[] = []
         for (let i = 0; i < daysToPad; i++) {
@@ -86,11 +89,11 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
             dayOfWeek: i,
           })
         }
-        
+
         // Add the actual month days
         firstWeek.push(...monthDays.slice(0, 7 - daysToPad))
         weeks.push(firstWeek)
-        
+
         // Add remaining weeks
         for (let i = 7 - daysToPad; i < monthDays.length; i += 7) {
           weeks.push(monthDays.slice(i, i + 7))
@@ -125,22 +128,34 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                         key={dayIndex}
                         className={cn(
                           "w-5 h-5 sm:w-6 sm:h-6 rounded-md transition-all duration-200 border-2 relative group cursor-pointer",
-                          // Empty cells (padding)
                           !day.date && "opacity-0",
-                          // Not scheduled days
                           day.date && !day.isScheduled && "bg-muted/20 border-muted-foreground/10 hover:border-muted-foreground/20",
-                          // Scheduled but not completed (missed)
-                          day.date && day.isScheduled && !day.isCompleted && "bg-muted/40 border-purple-300/40 hover:border-purple-300/60",
-                          // Completed days - purple gradient
-                          day.date && day.isScheduled && day.isCompleted && "bg-gradient-to-br from-purple-500 to-violet-500 border-purple-400 shadow-sm shadow-purple-500/20 hover:shadow-md hover:shadow-purple-500/30 hover:scale-105",
-                          // Today indicator
-                          isToday && "ring-2 ring-purple-300/50 ring-offset-1 ring-offset-background",
                         )}
+                        style={{
+                          ...(day.date && day.isScheduled && !day.isCompleted
+                            ? {
+                                backgroundColor: habitColorWithOpacity(heatmapColor, 0.15),
+                                borderColor: habitColorWithOpacity(heatmapColor, 0.3),
+                              }
+                            : {}),
+                          ...(day.date && day.isScheduled && day.isCompleted
+                            ? {
+                                backgroundColor: heatmapColor,
+                                borderColor: habitColorWithOpacity(heatmapColor, 0.8),
+                                boxShadow: `0 1px 3px ${habitColorWithOpacity(heatmapColor, 0.3)}`,
+                              }
+                            : {}),
+                          ...(isToday
+                            ? {
+                                outline: `2px solid ${habitColorWithOpacity(heatmapColor, 0.5)}`,
+                                outlineOffset: '1px',
+                              }
+                            : {}),
+                        }}
                         title={`${day.date}: ${
                           !day.isScheduled ? "Not scheduled" : day.isCompleted ? "Completed ✓" : "Not completed"
                         }`}
                       >
-                        {/* Day number for current month */}
                         {day.date && (
                           <span
                             className={cn(
@@ -151,7 +166,6 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
                             {day.dayOfMonth}
                           </span>
                         )}
-
                       </div>
                     )
                   })}
@@ -162,7 +176,7 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
         )
       })}
 
-      {/* Enhanced Legend */}
+      {/* Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-4 border-t border-white/10">
         <div className="flex items-center gap-3 sm:gap-4 text-xs">
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -170,11 +184,24 @@ export function HabitHeatmap({ habit }: { habit: Habit }) {
             <span className="text-muted-foreground">Not scheduled</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-muted/40 border-2 border-purple-300/40"></div>
+            <div
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-md border-2"
+              style={{
+                backgroundColor: habitColorWithOpacity(heatmapColor, 0.15),
+                borderColor: habitColorWithOpacity(heatmapColor, 0.3),
+              }}
+            ></div>
             <span className="text-muted-foreground">Missed</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-gradient-to-br from-purple-500 to-violet-500 border-2 border-purple-400 shadow-sm shadow-purple-500/20"></div>
+            <div
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-md border-2"
+              style={{
+                backgroundColor: heatmapColor,
+                borderColor: habitColorWithOpacity(heatmapColor, 0.8),
+                boxShadow: `0 1px 3px ${habitColorWithOpacity(heatmapColor, 0.3)}`,
+              }}
+            ></div>
             <span className="text-muted-foreground">Completed</span>
           </div>
         </div>

@@ -39,6 +39,7 @@ export function HabitForm({
         name: name.trim(),
         days: [...days],
         time,
+        color: '#8b5cf6',
       })
       setName("")
       setDays([0, 1, 2, 3, 4])

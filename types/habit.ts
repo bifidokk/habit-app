@@ -3,6 +3,7 @@ export type Habit = {
   name: string
   days: number[] // 0..6 (Mon..Sun)
   time: string // "HH:MM"
+  color: string // hex color e.g. "#8b5cf6"
   createdAt: string
   completions?: HabitCompletion[] // New: track when habits were completed
 }
@@ -16,6 +17,7 @@ export type HabitInput = {
   name: string
   days: number[]
   time: string
+  color: string
 }
 
 export type HabitStats = {
