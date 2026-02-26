@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { ArrowLeft, Pencil } from "lucide-react"
-import { HabitHeatmap } from "@/components/habits/habit-heatmap"
+import { MonthCalendar } from "@/components/habits/month-calendar"
 import type { Habit } from "@/types/habit"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 
@@ -50,20 +50,15 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
     const weeksSinceCreation = Math.max(1, Math.ceil(daysSinceCreation / 7))
     const monthsSinceCreation = Math.max(1, Math.ceil(daysSinceCreation / 30))
 
-    // Calculate total scheduled days
     const totalScheduledDays = Math.max(1, Math.round(daysSinceCreation * (habit.days.length / 7)))
 
     const dayRate = Math.min(100, Math.round((totalCompleted / totalScheduledDays) * 100))
-    const weekRate = dayRate // simplified
-    const monthRate = dayRate
 
     return {
       streak: getStreak(habit),
       totalCompleted,
+      totalScheduledDays,
       dayRate,
-      weekRate,
-      monthRate,
-      daysSinceCreation,
       weeksSinceCreation,
       monthsSinceCreation,
     }
@@ -77,21 +72,21 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
   return (
     <div className="px-4 pt-4 pb-20">
       {/* Nav bar */}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={onBack} className="flex items-center gap-1 text-sm text-muted-foreground">
-          <ArrowLeft className="w-4 h-4" />
-          Back
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={onBack} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <button onClick={onEdit} className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Pencil className="w-4 h-4" />
+        <button onClick={onEdit} className="px-4 py-2 rounded-full bg-white/10 text-sm font-medium">
           Edit
         </button>
       </div>
 
       {/* Header */}
-      <div className="text-center mb-6">
-        {emoji && <div className="text-5xl mb-2">{emoji}</div>}
-        <h1 className="text-xl font-bold">{nameWithoutEmoji}</h1>
+      <div className="mb-6">
+        <div className="flex items-center gap-3">
+          {emoji && <span className="text-4xl">{emoji}</span>}
+          <h1 className="text-2xl font-bold">{nameWithoutEmoji}</h1>
+        </div>
         {stats.streak > 0 && (
           <p className="text-sm mt-1" style={{ color }}>
             {stats.streak} day streak
@@ -99,12 +94,13 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
         )}
       </div>
 
-      {/* Stat cards */}
+      {/* Progress section */}
+      <h2 className="text-base font-bold mb-3">Progress</h2>
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
-          { label: "Days", rate: stats.dayRate, count: stats.totalCompleted },
-          { label: "Weeks", rate: stats.weekRate, count: stats.weeksSinceCreation },
-          { label: "Months", rate: stats.monthRate, count: stats.monthsSinceCreation },
+          { label: "Days", rate: stats.dayRate, sub: `${stats.totalCompleted} days of ${stats.totalScheduledDays}` },
+          { label: "Weeks", rate: stats.dayRate, sub: `${Math.min(stats.weeksSinceCreation, Math.ceil(stats.totalCompleted / (habit.days.length || 1)))} weeks of ${stats.weeksSinceCreation}` },
+          { label: "Months", rate: stats.dayRate, sub: `${Math.min(stats.monthsSinceCreation, Math.ceil(stats.totalCompleted / ((habit.days.length || 1) * 4)))} months of ${stats.monthsSinceCreation}` },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -114,15 +110,17 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
               borderColor: habitColorWithOpacity(color, 0.2),
             }}
           >
+            <div className="text-xs text-muted-foreground mb-1">{stat.label}</div>
             <div className="text-2xl font-bold">{stat.rate}%</div>
-            <div className="text-xs text-muted-foreground">{stat.label}</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">{stat.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Heatmap */}
+      {/* Calendar section */}
+      <h2 className="text-base font-bold mb-3">Calendar</h2>
       <div className="rounded-2xl border border-white/10 bg-card/50 p-4">
-        <HabitHeatmap habit={habit} color={color} />
+        <MonthCalendar habit={habit} color={color} />
       </div>
     </div>
   )
