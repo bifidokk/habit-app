@@ -41,26 +41,87 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
   const color = habit.color
 
   const stats = useMemo(() => {
-    const completions = habit.completions?.filter((c) => c.completed) || []
-    const totalCompleted = completions.length
+    const completedDates = new Set(
+      (habit.completions || []).filter((c) => c.completed).map((c) => c.date)
+    )
 
-    const now = new Date()
-    const createdAt = new Date(habit.createdAt)
-    const daysSinceCreation = Math.max(1, Math.ceil((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)))
-    const weeksSinceCreation = Math.max(1, Math.ceil(daysSinceCreation / 7))
-    const monthsSinceCreation = Math.max(1, Math.ceil(daysSinceCreation / 30))
+    const fmt = (d: Date) => {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, "0")
+      const dd = String(d.getDate()).padStart(2, "0")
+      return `${y}-${m}-${dd}`
+    }
 
-    const totalScheduledDays = Math.max(1, Math.round(daysSinceCreation * (habit.days.length / 7)))
+    // --- Days: current week (Mon-Sun), completed out of 7 ---
+    const today = new Date()
+    const jsDay = today.getDay()
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (jsDay === 0 ? 6 : jsDay - 1))
+    monday.setHours(0, 0, 0, 0)
 
-    const dayRate = Math.min(100, Math.round((totalCompleted / totalScheduledDays) * 100))
+    let daysCompleted = 0
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday)
+      d.setDate(monday.getDate() + i)
+      if (completedDates.has(fmt(d))) daysCompleted++
+    }
+    const dayRate = Math.round((daysCompleted / 7) * 100)
+
+    // --- Weeks: last 4 weeks, a week counts if all scheduled days were completed ---
+    let weeksCompleted = 0
+    for (let w = 0; w < 4; w++) {
+      const weekMonday = new Date(monday)
+      weekMonday.setDate(monday.getDate() - w * 7)
+      let allDone = true
+      let hasScheduled = false
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekMonday)
+        d.setDate(weekMonday.getDate() + i)
+        const backendDay = d.getDay() === 0 ? 6 : d.getDay() - 1
+        if (habit.days.includes(backendDay)) {
+          hasScheduled = true
+          if (!completedDates.has(fmt(d))) {
+            allDone = false
+            break
+          }
+        }
+      }
+      if (hasScheduled && allDone) weeksCompleted++
+    }
+    const weekRate = Math.round((weeksCompleted / 4) * 100)
+
+    // --- Months: last 12 months, a month counts if all scheduled days were completed ---
+    let monthsCompleted = 0
+    for (let m = 0; m < 12; m++) {
+      const monthStart = new Date(today.getFullYear(), today.getMonth() - m, 1)
+      const monthEnd = new Date(today.getFullYear(), today.getMonth() - m + 1, 0)
+      let allDone = true
+      let hasScheduled = false
+      for (let day = 1; day <= monthEnd.getDate(); day++) {
+        const d = new Date(monthStart.getFullYear(), monthStart.getMonth(), day)
+        // Skip future days
+        if (d > today) break
+        const backendDay = d.getDay() === 0 ? 6 : d.getDay() - 1
+        if (habit.days.includes(backendDay)) {
+          hasScheduled = true
+          if (!completedDates.has(fmt(d))) {
+            allDone = false
+            break
+          }
+        }
+      }
+      if (hasScheduled && allDone) monthsCompleted++
+    }
+    const monthRate = Math.round((monthsCompleted / 12) * 100)
 
     return {
       streak: getStreak(habit),
-      totalCompleted,
-      totalScheduledDays,
+      daysCompleted,
       dayRate,
-      weeksSinceCreation,
-      monthsSinceCreation,
+      weeksCompleted,
+      weekRate,
+      monthsCompleted,
+      monthRate,
     }
   }, [habit])
 
@@ -98,9 +159,9 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
       <h2 className="text-base font-bold mb-3">Progress</h2>
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
-          { label: "Days", rate: stats.dayRate, sub: `${stats.totalCompleted} days of ${stats.totalScheduledDays}` },
-          { label: "Weeks", rate: stats.dayRate, sub: `${Math.min(stats.weeksSinceCreation, Math.ceil(stats.totalCompleted / (habit.days.length || 1)))} weeks of ${stats.weeksSinceCreation}` },
-          { label: "Months", rate: stats.dayRate, sub: `${Math.min(stats.monthsSinceCreation, Math.ceil(stats.totalCompleted / ((habit.days.length || 1) * 4)))} months of ${stats.monthsSinceCreation}` },
+          { label: "Days", rate: stats.dayRate, sub: `${stats.daysCompleted} days of 7` },
+          { label: "Weeks", rate: stats.weekRate, sub: `${stats.weeksCompleted} weeks of 4` },
+          { label: "Months", rate: stats.monthRate, sub: `${stats.monthsCompleted} months of 12` },
         ].map((stat) => (
           <div
             key={stat.label}
