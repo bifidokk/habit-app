@@ -67,50 +67,35 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
     }
     const dayRate = Math.round((daysCompleted / 7) * 100)
 
-    // --- Weeks: last 4 weeks, a week counts if all scheduled days were completed ---
+    // --- Weeks: last 4 weeks, a week counts if at least one day was completed ---
     let weeksCompleted = 0
     for (let w = 0; w < 4; w++) {
       const weekMonday = new Date(monday)
       weekMonday.setDate(monday.getDate() - w * 7)
-      let allDone = true
-      let hasScheduled = false
       for (let i = 0; i < 7; i++) {
         const d = new Date(weekMonday)
         d.setDate(weekMonday.getDate() + i)
-        const backendDay = d.getDay() === 0 ? 6 : d.getDay() - 1
-        if (habit.days.includes(backendDay)) {
-          hasScheduled = true
-          if (!completedDates.has(fmt(d))) {
-            allDone = false
-            break
-          }
+        if (completedDates.has(fmt(d))) {
+          weeksCompleted++
+          break
         }
       }
-      if (hasScheduled && allDone) weeksCompleted++
     }
     const weekRate = Math.round((weeksCompleted / 4) * 100)
 
-    // --- Months: last 12 months, a month counts if all scheduled days were completed ---
+    // --- Months: last 12 months, a month counts if at least one day was completed ---
     let monthsCompleted = 0
     for (let m = 0; m < 12; m++) {
       const monthStart = new Date(today.getFullYear(), today.getMonth() - m, 1)
       const monthEnd = new Date(today.getFullYear(), today.getMonth() - m + 1, 0)
-      let allDone = true
-      let hasScheduled = false
       for (let day = 1; day <= monthEnd.getDate(); day++) {
         const d = new Date(monthStart.getFullYear(), monthStart.getMonth(), day)
-        // Skip future days
         if (d > today) break
-        const backendDay = d.getDay() === 0 ? 6 : d.getDay() - 1
-        if (habit.days.includes(backendDay)) {
-          hasScheduled = true
-          if (!completedDates.has(fmt(d))) {
-            allDone = false
-            break
-          }
+        if (completedDates.has(fmt(d))) {
+          monthsCompleted++
+          break
         }
       }
-      if (hasScheduled && allDone) monthsCompleted++
     }
     const monthRate = Math.round((monthsCompleted / 12) * 100)
 
