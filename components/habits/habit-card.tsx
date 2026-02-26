@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Check } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, jsDayToBackendDay } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 import { isHabitCompletedToday, completeHabit, getTodayDateString } from "@/lib/storage"
 import { DayDots } from "@/components/habits/day-dots"
@@ -60,6 +60,32 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
     }
   }
 
+  // Compute which days of the current week (Mon-Sun) were completed
+  const completedDaysThisWeek = useMemo(() => {
+    if (!habit.completions?.length) return []
+    const today = new Date()
+    const jsDay = today.getDay()
+    // Monday of this week
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (jsDay === 0 ? 6 : jsDay - 1))
+    monday.setHours(0, 0, 0, 0)
+
+    const completedSet = new Set(
+      habit.completions.filter((c) => c.completed).map((c) => c.date)
+    )
+
+    const days: number[] = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday)
+      d.setDate(monday.getDate() + i)
+      const dateStr = d.toISOString().split("T")[0]
+      if (completedSet.has(dateStr)) {
+        days.push(i) // 0=Mon..6=Sun (backend format)
+      }
+    }
+    return days
+  }, [habit.completions])
+
   // Split emoji from name
   const emojiMatch = habit.name.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*/u)
   const emoji = emojiMatch ? emojiMatch[0].trim() : null
@@ -107,7 +133,7 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
       </div>
 
       {/* Bottom: day dots */}
-      <DayDots activeDays={habit.days} color={color} />
+      <DayDots completedDays={completedDaysThisWeek} color={color} />
     </div>
   )
 }
