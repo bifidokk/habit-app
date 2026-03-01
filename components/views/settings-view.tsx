@@ -61,6 +61,20 @@ export function SettingsView({
         </div>
       </div>
 
+      {/* Support */}
+      <div className="rounded-2xl border border-white/10 bg-card/50 p-4 mb-4 space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Support</h2>
+        <a
+          href="https://t.me/habitsupportbot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between text-sm"
+        >
+          <span className="text-muted-foreground">Questions or feedback?</span>
+          <span className="text-purple-400 font-medium">@habitsupportbot</span>
+        </a>
+      </div>
+
       {/* About */}
       <div className="rounded-2xl border border-white/10 bg-card/50 p-4 space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">About</h2>
