@@ -100,7 +100,7 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
       {/* Top row: streak + check */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {streak > 0 ? `${streak} day${streak !== 1 ? "s" : ""}` : ""}
+          {`${streak} day${streak !== 1 ? "s" : ""}`}
         </span>
         <button
           onClick={handleComplete}
