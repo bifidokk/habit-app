@@ -40,6 +40,10 @@ export async function completeHabit(habitId: string, date: string): Promise<Habi
   return normalizeHabit(await apiToggleHabitCompletion(habitId, date, true))
 }
 
+export async function toggleHabit(habitId: string, date: string, completed: boolean): Promise<Habit> {
+  return normalizeHabit(await apiToggleHabitCompletion(habitId, date, completed))
+}
+
 export async function getHabitById(habitId: string): Promise<Habit | null> {
   try {
     const habits = await getHabits()

@@ -20,6 +20,7 @@ function formatDateLocal(date: Date): string {
 interface MonthCalendarProps {
   habit: Habit
   color: string
+  onDayToggle?: (date: string, completed: boolean) => void
 }
 
 interface DayCell {
@@ -95,13 +96,15 @@ function buildMonth(year: number, month: number, habit: Habit): DayCell[] {
   return cells
 }
 
-export function MonthCalendar({ habit, color }: MonthCalendarProps) {
+export function MonthCalendar({ habit, color, onDayToggle }: MonthCalendarProps) {
   const { t } = useLocale()
   const monthNames = getMonthNames(t)
 
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
+  const [loadingDates, setLoadingDates] = useState<Set<string>>(new Set())
+  const todayStr = formatDateLocal(new Date())
 
   // Swipe handling
   const touchStartX = useRef(0)
@@ -140,6 +143,20 @@ export function MonthCalendar({ habit, color }: MonthCalendarProps) {
     }
   }
 
+  const handleDayTap = useCallback(async (cell: DayCell) => {
+    if (!onDayToggle || !cell.inMonth || cell.date > todayStr) return
+    setLoadingDates((prev) => new Set(prev).add(cell.date))
+    try {
+      await onDayToggle(cell.date, !cell.isCompleted)
+    } finally {
+      setLoadingDates((prev) => {
+        const next = new Set(prev)
+        next.delete(cell.date)
+        return next
+      })
+    }
+  }, [onDayToggle, todayStr])
+
   const cells = useMemo(() => buildMonth(year, month, habit), [year, month, habit])
   const weeks: DayCell[][] = []
   for (let i = 0; i < cells.length; i += 7) {
@@ -176,33 +193,41 @@ export function MonthCalendar({ habit, color }: MonthCalendarProps) {
       {/* Calendar grid */}
       {weeks.map((week, wi) => (
         <div key={wi} className="grid grid-cols-7">
-          {week.map((cell, ci) => (
-            <div
-              key={ci}
-              className="flex items-center justify-center py-1.5"
-            >
+          {week.map((cell, ci) => {
+            const isFuture = cell.date > todayStr
+            const isLoading = loadingDates.has(cell.date)
+            const tappable = onDayToggle && cell.inMonth && !isFuture && !isLoading
+            return (
               <div
-                className={cn(
-                  "w-9 h-9 rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
-                  !cell.inMonth && "opacity-30",
-                  cell.isToday && !cell.isCompleted && "ring-1 ring-offset-1 ring-offset-background",
-                )}
-                style={{
-                  ...(cell.isScheduled && cell.isCompleted
-                    ? { backgroundColor: habitColorWithOpacity(color, 0.35), color: color }
-                    : {}),
-                  ...(cell.isToday && !cell.isCompleted
-                    ? { borderColor: color, ringColor: color }
-                    : {}),
-                  ...(cell.isToday
-                    ? { outlineColor: color }
-                    : {}),
-                }}
+                key={ci}
+                className="flex items-center justify-center py-1.5"
               >
-                {cell.dayOfMonth}
+                <div
+                  onClick={tappable ? () => handleDayTap(cell) : undefined}
+                  className={cn(
+                    "w-9 h-9 rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
+                    !cell.inMonth && "opacity-30",
+                    cell.isToday && !cell.isCompleted && "ring-1 ring-offset-1 ring-offset-background",
+                    tappable && "cursor-pointer active:scale-95 transition-transform",
+                    isLoading && "opacity-50 animate-pulse",
+                  )}
+                  style={{
+                    ...(cell.isScheduled && cell.isCompleted
+                      ? { backgroundColor: habitColorWithOpacity(color, 0.35), color: color }
+                      : {}),
+                    ...(cell.isToday && !cell.isCompleted
+                      ? { borderColor: color, ringColor: color }
+                      : {}),
+                    ...(cell.isToday
+                      ? { outlineColor: color }
+                      : {}),
+                  }}
+                >
+                  {cell.dayOfMonth}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       ))}
     </div>

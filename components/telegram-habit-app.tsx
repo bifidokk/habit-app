@@ -115,6 +115,7 @@ export default function TelegramHabitAppContent() {
                 habit={selectedHabit}
                 onBack={() => setNavState({ view: AppView.Today })}
                 onEdit={handleEditFromDetail}
+                onHabitChanged={onHabitCompleted}
               />
             )}
           </>

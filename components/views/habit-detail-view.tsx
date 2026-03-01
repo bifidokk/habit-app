@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { ArrowLeft, Pencil } from "lucide-react"
 import { MonthCalendar } from "@/components/habits/month-calendar"
 import { useLocale } from "@/contexts/locale-context"
+import { toggleHabit } from "@/lib/storage"
 import type { Habit } from "@/types/habit"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 
@@ -11,6 +12,7 @@ interface HabitDetailViewProps {
   habit: Habit
   onBack: () => void
   onEdit: () => void
+  onHabitChanged?: () => void
 }
 
 function getStreak(habit: Habit): number {
@@ -38,7 +40,7 @@ function getStreak(habit: Habit): number {
   return streak
 }
 
-export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps) {
+export function HabitDetailView({ habit, onBack, onEdit, onHabitChanged }: HabitDetailViewProps) {
   const { t } = useLocale()
   const color = habit.color
 
@@ -112,6 +114,11 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
     }
   }, [habit])
 
+  const handleDayToggle = useCallback(async (date: string, completed: boolean) => {
+    await toggleHabit(habit.id, date, completed)
+    onHabitChanged?.()
+  }, [habit.id, onHabitChanged])
+
   // Split emoji from name
   const emojiMatch = habit.name.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*/u)
   const emoji = emojiMatch ? emojiMatch[0].trim() : null
@@ -168,7 +175,7 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
       {/* Calendar section */}
       <h2 className="text-base font-bold mb-3">{t('detail.calendar')}</h2>
       <div className="rounded-2xl border border-white/10 bg-card/50 p-4">
-        <MonthCalendar habit={habit} color={color} />
+        <MonthCalendar habit={habit} color={color} onDayToggle={handleDayToggle} />
       </div>
     </div>
   )
