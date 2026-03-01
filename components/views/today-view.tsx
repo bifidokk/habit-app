@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus } from "lucide-react"
+import { Plus, MessageCircle } from "lucide-react"
 import { HabitCard } from "@/components/habits/habit-card"
 import { HabitStatusAlerts } from "@/components/habits/habit-status-alerts"
 import type { Habit } from "@/types/habit"
@@ -54,6 +54,15 @@ export function TodayView({
         <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg mb-1">No habits yet</p>
           <p className="text-sm">Tap + to create your first habit</p>
+          <a
+            href="https://t.me/habitsupportbot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-6 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Need help? @habitsupportbot
+          </a>
         </div>
       )}
     </div>
