@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { ArrowLeft, Pencil } from "lucide-react"
 import { MonthCalendar } from "@/components/habits/month-calendar"
+import { useLocale } from "@/contexts/locale-context"
 import type { Habit } from "@/types/habit"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 
@@ -38,6 +39,7 @@ function getStreak(habit: Habit): number {
 }
 
 export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps) {
+  const { t } = useLocale()
   const color = habit.color
 
   const stats = useMemo(() => {
@@ -123,7 +125,7 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
           <ArrowLeft className="w-5 h-5" />
         </button>
         <button onClick={onEdit} className="px-4 py-2 rounded-full bg-white/10 text-sm font-medium">
-          Edit
+          {t('common.edit')}
         </button>
       </div>
 
@@ -135,18 +137,18 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
         </div>
         {stats.streak > 0 && (
           <p className="text-sm mt-1" style={{ color }}>
-            {stats.streak} day streak
+            {stats.streak} {t('detail.dayStreak')}
           </p>
         )}
       </div>
 
       {/* Progress section */}
-      <h2 className="text-base font-bold mb-3">Progress</h2>
+      <h2 className="text-base font-bold mb-3">{t('detail.progress')}</h2>
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
-          { label: "Days", rate: stats.dayRate, sub: `${stats.daysCompleted} days of 7` },
-          { label: "Weeks", rate: stats.weekRate, sub: `${stats.weeksCompleted} weeks of 4` },
-          { label: "Months", rate: stats.monthRate, sub: `${stats.monthsCompleted} months of 12` },
+          { label: t('detail.days'), rate: stats.dayRate, sub: t('detail.daysOf7').replace('{n}', String(stats.daysCompleted)) },
+          { label: t('detail.weeks'), rate: stats.weekRate, sub: t('detail.weeksOf4').replace('{n}', String(stats.weeksCompleted)) },
+          { label: t('detail.months'), rate: stats.monthRate, sub: t('detail.monthsOf12').replace('{n}', String(stats.monthsCompleted)) },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -164,7 +166,7 @@ export function HabitDetailView({ habit, onBack, onEdit }: HabitDetailViewProps)
       </div>
 
       {/* Calendar section */}
-      <h2 className="text-base font-bold mb-3">Calendar</h2>
+      <h2 className="text-base font-bold mb-3">{t('detail.calendar')}</h2>
       <div className="rounded-2xl border border-white/10 bg-card/50 p-4">
         <MonthCalendar habit={habit} color={color} />
       </div>

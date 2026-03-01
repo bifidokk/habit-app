@@ -4,12 +4,10 @@ import { useCallback, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn, jsDayToBackendDay } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
+import { useLocale } from "@/contexts/locale-context"
+import { getMonthNames } from "@/lib/i18n"
 import type { Habit } from "@/types/habit"
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-]
 const DAY_HEADERS = ["M", "T", "W", "T", "F", "S", "S"]
 
 function formatDateLocal(date: Date): string {
@@ -98,6 +96,9 @@ function buildMonth(year: number, month: number, habit: Habit): DayCell[] {
 }
 
 export function MonthCalendar({ habit, color }: MonthCalendarProps) {
+  const { t } = useLocale()
+  const monthNames = getMonthNames(t)
+
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -156,7 +157,7 @@ export function MonthCalendar({ habit, color }: MonthCalendarProps) {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <h3 className="text-base font-bold">
-          {MONTH_NAMES[month]} {year}
+          {monthNames[month]} {year}
         </h3>
         <button onClick={goToNext} className="p-1 text-muted-foreground hover:text-foreground">
           <ChevronRight className="w-5 h-5" />

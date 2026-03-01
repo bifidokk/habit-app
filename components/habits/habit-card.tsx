@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 import { isHabitCompletedToday, completeHabit, getTodayDateString } from "@/lib/storage"
 import { DayDots } from "@/components/habits/day-dots"
+import { useLocale } from "@/contexts/locale-context"
 import type { Habit } from "@/types/habit"
 
 interface HabitCardProps {
@@ -40,6 +41,7 @@ function getStreak(habit: Habit): number {
 }
 
 export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
+  const { t } = useLocale()
   const [completing, setCompleting] = useState(false)
   const completed = isHabitCompletedToday(habit)
   const streak = getStreak(habit)
@@ -88,6 +90,8 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
   const emoji = emojiMatch ? emojiMatch[0].trim() : null
   const nameWithoutEmoji = emojiMatch ? habit.name.slice(emojiMatch[0].length) : habit.name
 
+  const streakLabel = streak === 1 ? t('card.day') : t('card.days')
+
   return (
     <div
       onClick={onTap}
@@ -100,7 +104,7 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
       {/* Top row: streak + check */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {`${streak} day${streak !== 1 ? "s" : ""}`}
+          {`${streak} ${streakLabel}`}
         </span>
         <button
           onClick={handleComplete}

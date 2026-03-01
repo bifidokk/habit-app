@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { ChevronDown } from "lucide-react"
 import { YearHeatmap } from "@/components/habits/year-heatmap"
+import { useLocale } from "@/contexts/locale-context"
 import type { Habit } from "@/types/habit"
 
 interface YearViewProps {
@@ -10,6 +11,7 @@ interface YearViewProps {
 }
 
 export function YearView({ habits }: YearViewProps) {
+  const { t } = useLocale()
   const [selectedHabitId, setSelectedHabitId] = useState<string | null>(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const currentYear = new Date().getFullYear()
@@ -25,8 +27,8 @@ export function YearView({ habits }: YearViewProps) {
   if (habits.length === 0) {
     return (
       <div className="px-4 pt-4 pb-20 text-center">
-        <h1 className="text-2xl font-bold tracking-tight mb-8">Year</h1>
-        <p className="text-muted-foreground">No habits yet</p>
+        <h1 className="text-2xl font-bold tracking-tight mb-8">{t('year.title')}</h1>
+        <p className="text-muted-foreground">{t('year.noHabits')}</p>
       </div>
     )
   }
@@ -35,7 +37,7 @@ export function YearView({ habits }: YearViewProps) {
     <div className="px-4 pt-4 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold tracking-tight">Year</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('year.title')}</h1>
         <span className="text-sm text-muted-foreground">{currentYear}</span>
       </div>
 

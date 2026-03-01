@@ -6,6 +6,7 @@ export interface AuthUser {
   last_name?: string
   username?: string
   language_code?: string
+  language?: string
   photo_url?: string
 }
 

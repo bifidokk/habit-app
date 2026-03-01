@@ -3,6 +3,8 @@
 import { useMemo } from "react"
 import { cn, jsDayToBackendDay } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
+import { useLocale } from "@/contexts/locale-context"
+import { getShortMonthNames } from "@/lib/i18n"
 import type { Habit } from "@/types/habit"
 
 interface HeatmapDay {
@@ -23,6 +25,7 @@ function formatDateLocal(date: Date): string {
 }
 
 export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string }) {
+  const { t } = useLocale()
   const heatmapColor = color || habit.color || '#8b5cf6'
 
   const heatmapData = useMemo(() => {
@@ -62,7 +65,7 @@ export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string })
     return months
   }, [habit])
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const monthNames = getShortMonthNames(t)
   const dayNames = ["M", "T", "W", "T", "F", "S", "S"]
 
   return (
@@ -153,7 +156,7 @@ export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string })
                             : {}),
                         }}
                         title={`${day.date}: ${
-                          !day.isScheduled ? "Not scheduled" : day.isCompleted ? "Completed ✓" : "Not completed"
+                          !day.isScheduled ? t('heatmap.notScheduled') : day.isCompleted ? t('heatmap.completed') + " ✓" : t('heatmap.missed')
                         }`}
                       >
                         {day.date && (
@@ -181,7 +184,7 @@ export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string })
         <div className="flex items-center gap-3 sm:gap-4 text-xs">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-md bg-muted/20 border-2 border-muted-foreground/10"></div>
-            <span className="text-muted-foreground">Not scheduled</span>
+            <span className="text-muted-foreground">{t('heatmap.notScheduled')}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div
@@ -191,7 +194,7 @@ export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string })
                 borderColor: habitColorWithOpacity(heatmapColor, 0.3),
               }}
             ></div>
-            <span className="text-muted-foreground">Missed</span>
+            <span className="text-muted-foreground">{t('heatmap.missed')}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div
@@ -202,11 +205,11 @@ export function HabitHeatmap({ habit, color }: { habit: Habit; color?: string })
                 boxShadow: `0 1px 3px ${habitColorWithOpacity(heatmapColor, 0.3)}`,
               }}
             ></div>
-            <span className="text-muted-foreground">Completed</span>
+            <span className="text-muted-foreground">{t('heatmap.completed')}</span>
           </div>
         </div>
         <div className="text-xs text-muted-foreground">
-          {habit.completions?.filter((c) => c.completed).length || 0} days completed
+          {t('heatmap.daysCompleted').replace('{n}', String(habit.completions?.filter((c) => c.completed).length || 0))}
         </div>
       </div>
     </div>

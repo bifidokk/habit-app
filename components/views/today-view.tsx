@@ -3,6 +3,7 @@
 import { Plus, MessageCircle } from "lucide-react"
 import { HabitCard } from "@/components/habits/habit-card"
 import { HabitStatusAlerts } from "@/components/habits/habit-status-alerts"
+import { useLocale } from "@/contexts/locale-context"
 import type { Habit } from "@/types/habit"
 
 interface TodayViewProps {
@@ -22,15 +23,17 @@ export function TodayView({
   onTapHabit,
   onHabitCompleted,
 }: TodayViewProps) {
+  const { t } = useLocale()
+
   return (
     <div className="px-4 pt-4 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold tracking-tight">Today</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('today.title')}</h1>
         <button
           onClick={onOpenNewHabit}
           className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/15 transition-colors"
-          aria-label="Add habit"
+          aria-label={t('habits.addLabel')}
         >
           <Plus className="w-5 h-5" />
         </button>
@@ -52,8 +55,8 @@ export function TodayView({
         </div>
       ) : (
         <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg mb-1">No habits yet</p>
-          <p className="text-sm">Tap + to create your first habit</p>
+          <p className="text-lg mb-1">{t('today.noHabits')}</p>
+          <p className="text-sm">{t('today.addFirst')}</p>
           <a
             href="https://t.me/habitsupportbot"
             target="_blank"
@@ -61,7 +64,7 @@ export function TodayView({
             className="inline-flex items-center gap-1.5 mt-6 text-sm text-purple-400 hover:text-purple-300 transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
-            Need help? @habitsupportbot
+            {t('today.needHelp')}
           </a>
         </div>
       )}
@@ -74,7 +77,7 @@ export function TodayView({
         className="flex items-center justify-center gap-1.5 mt-6 text-sm text-muted-foreground hover:text-purple-400 transition-colors"
       >
         <MessageCircle className="w-3.5 h-3.5" />
-        Support @habitsupportbot
+        {t('today.support')}
       </a>
     </div>
   )
