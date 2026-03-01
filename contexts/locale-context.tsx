@@ -22,7 +22,8 @@ export function useLocale() {
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
 
-  const locale: Locale = user?.language === 'ru' ? 'ru' : 'en'
+  const language = user?.language || user?.language_code || 'en'
+  const locale: Locale = language.startsWith('ru') ? 'ru' : 'en'
 
   const value = useMemo(() => {
     const translations = getTranslations(locale)
