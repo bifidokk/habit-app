@@ -114,9 +114,8 @@ export function HabitDetailView({ habit, onBack, onEdit, onHabitChanged }: Habit
     }
   }, [habit])
 
-  const handleDayToggle = useCallback(async (date: string, completed: boolean) => {
-    await toggleHabit(habit.id, date, completed)
-    onHabitChanged?.()
+  const handleDayToggle = useCallback((date: string, completed: boolean) => {
+    toggleHabit(habit.id, date, completed).then(() => onHabitChanged?.())
   }, [habit.id, onHabitChanged])
 
   // Split emoji from name

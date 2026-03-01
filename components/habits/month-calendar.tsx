@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn, jsDayToBackendDay } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
@@ -32,10 +32,14 @@ interface DayCell {
   isToday: boolean
 }
 
-function buildMonth(year: number, month: number, habit: Habit): DayCell[] {
+function buildMonth(year: number, month: number, habit: Habit, optimistic: Map<string, boolean>): DayCell[] {
   const completionMap = new Map(
     (habit.completions || []).map((c) => [c.date, c.completed])
   )
+  // Apply optimistic overrides
+  for (const [date, completed] of optimistic) {
+    completionMap.set(date, completed)
+  }
   const todayStr = formatDateLocal(new Date())
 
   const firstOfMonth = new Date(year, month, 1)
@@ -103,8 +107,13 @@ export function MonthCalendar({ habit, color, onDayToggle }: MonthCalendarProps)
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
-  const [loadingDates, setLoadingDates] = useState<Set<string>>(new Set())
+  const [optimistic, setOptimistic] = useState<Map<string, boolean>>(new Map())
   const todayStr = formatDateLocal(new Date())
+
+  // Clear optimistic overrides when habit prop updates (server data arrived)
+  useEffect(() => {
+    setOptimistic(new Map())
+  }, [habit])
 
   // Swipe handling
   const touchStartX = useRef(0)
@@ -143,21 +152,16 @@ export function MonthCalendar({ habit, color, onDayToggle }: MonthCalendarProps)
     }
   }
 
-  const handleDayTap = useCallback(async (cell: DayCell) => {
+  const handleDayTap = useCallback((cell: DayCell) => {
     if (!onDayToggle || !cell.inMonth || cell.date > todayStr) return
-    setLoadingDates((prev) => new Set(prev).add(cell.date))
-    try {
-      await onDayToggle(cell.date, !cell.isCompleted)
-    } finally {
-      setLoadingDates((prev) => {
-        const next = new Set(prev)
-        next.delete(cell.date)
-        return next
-      })
-    }
+    const newCompleted = !cell.isCompleted
+    // Optimistic update — instant UI
+    setOptimistic((prev) => new Map(prev).set(cell.date, newCompleted))
+    // Fire API in background, clear optimistic override when server confirms
+    onDayToggle(cell.date, newCompleted)
   }, [onDayToggle, todayStr])
 
-  const cells = useMemo(() => buildMonth(year, month, habit), [year, month, habit])
+  const cells = useMemo(() => buildMonth(year, month, habit, optimistic), [year, month, habit, optimistic])
   const weeks: DayCell[][] = []
   for (let i = 0; i < cells.length; i += 7) {
     weeks.push(cells.slice(i, i + 7))
@@ -195,8 +199,7 @@ export function MonthCalendar({ habit, color, onDayToggle }: MonthCalendarProps)
         <div key={wi} className="grid grid-cols-7">
           {week.map((cell, ci) => {
             const isFuture = cell.date > todayStr
-            const isLoading = loadingDates.has(cell.date)
-            const tappable = onDayToggle && cell.inMonth && !isFuture && !isLoading
+            const tappable = onDayToggle && cell.inMonth && !isFuture
             return (
               <div
                 key={ci}
@@ -209,7 +212,6 @@ export function MonthCalendar({ habit, color, onDayToggle }: MonthCalendarProps)
                     !cell.inMonth && "opacity-30",
                     cell.isToday && !cell.isCompleted && "ring-1 ring-offset-1 ring-offset-background",
                     tappable && "cursor-pointer active:scale-95 transition-transform",
-                    isLoading && "opacity-50 animate-pulse",
                   )}
                   style={{
                     ...(cell.isScheduled && cell.isCompleted
