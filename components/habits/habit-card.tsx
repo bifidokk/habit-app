@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Check } from "lucide-react"
-import { cn, jsDayToBackendDay } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { habitColorWithOpacity } from "@/lib/habit-colors"
 import { isHabitCompletedToday, completeHabit, getTodayDateString } from "@/lib/storage"
 import { DayDots } from "@/components/habits/day-dots"
@@ -14,26 +14,26 @@ interface HabitCardProps {
   onCompleted: () => void
 }
 
+function fmtLocal(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
 function getStreak(habit: Habit): number {
   if (!habit.completions?.length) return 0
-  const sorted = habit.completions
-    .filter((c) => c.completed)
-    .map((c) => c.date)
-    .sort()
-    .reverse()
+  const completedSet = new Set(
+    habit.completions.filter((c) => c.completed).map((c) => c.date)
+  )
 
-  const today = getTodayDateString()
+  const today = new Date()
   let streak = 0
-  const d = new Date(today)
 
   for (let i = 0; i < 365; i++) {
-    const dateStr = d.toISOString().split("T")[0]
-    if (sorted.includes(dateStr)) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i)
+    if (completedSet.has(fmtLocal(d))) {
       streak++
     } else if (i > 0) {
       break
     }
-    d.setDate(d.getDate() - 1)
   }
 
   return streak
@@ -66,9 +66,7 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
     const today = new Date()
     const jsDay = today.getDay()
     // Monday of this week
-    const monday = new Date(today)
-    monday.setDate(today.getDate() - (jsDay === 0 ? 6 : jsDay - 1))
-    monday.setHours(0, 0, 0, 0)
+    const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (jsDay === 0 ? 6 : jsDay - 1))
 
     const completedSet = new Set(
       habit.completions.filter((c) => c.completed).map((c) => c.date)
@@ -76,9 +74,8 @@ export function HabitCard({ habit, onTap, onCompleted }: HabitCardProps) {
 
     const days: number[] = []
     for (let i = 0; i < 7; i++) {
-      const d = new Date(monday)
-      d.setDate(monday.getDate() + i)
-      const dateStr = d.toISOString().split("T")[0]
+      const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
       if (completedSet.has(dateStr)) {
         days.push(i) // 0=Mon..6=Sun (backend format)
       }
