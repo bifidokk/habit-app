@@ -65,6 +65,17 @@ export function TodayView({
           </a>
         </div>
       )}
+
+      {/* Support link */}
+      <a
+        href="https://t.me/habitsupportbot"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-1.5 mt-6 text-sm text-muted-foreground hover:text-purple-400 transition-colors"
+      >
+        <MessageCircle className="w-3.5 h-3.5" />
+        Support @habitsupportbot
+      </a>
     </div>
   )
 }
